@@ -15,6 +15,7 @@ Tài liệu này ghi lại phần việc của Khoa trong Project02: CI build Do
 Workflow này:
 
 - Chạy khi push lên mọi branch.
+- Với backend service, chạy Maven package trước để tạo `target/*.jar`.
 - Build Docker image cho các service chính.
 - Push image lên Docker Hub.
 - Tag image bằng commit SHA, ví dụ `yas-tax:<commit_sha>`.
@@ -200,6 +201,7 @@ CI được xem là hoàn thành khi:
 - Workflow status màu xanh.
 - Các job service đều pass.
 - Trong log có bước `Log in to Docker Hub`.
+- Với backend, trong log có bước `Build backend jar`.
 - Trong log có bước `Build and push`.
 - Docker Hub xuất hiện image tag commit SHA.
 
@@ -223,6 +225,34 @@ latest
 ```
 
 Lưu ý: CD developer dùng `latest` cho các service để `main`. Vì vậy trước khi chạy CD developer với nhiều input `main`, cần bảo đảm Docker Hub đã có các image `latest`. Cách chắc nhất là merge/push `main` để CI tạo `latest`, hoặc chọn branch cụ thể cho service cần test sau khi CI của branch đó đã chạy xong.
+
+### Nếu CI fail toàn bộ job
+
+Run đầu tiên trên branch `feat/pipeline-cd` đã fail ở bước `Build and push`, có 2 nhóm lỗi:
+
+1. Backend service fail với lỗi:
+
+```text
+lstat /target: no such file or directory
+```
+
+Nguyên nhân: Dockerfile backend copy `target/*.jar`, nhưng workflow lúc đầu chưa chạy Maven package. Đã sửa bằng bước `Build backend jar`.
+
+2. UI/static service fail với lỗi:
+
+```text
+401 Unauthorized: access token has insufficient scopes
+```
+
+Nguyên nhân: `DOCKERHUB_TOKEN` đăng nhập được nhưng chưa có quyền push image, hoặc `DOCKERHUB_USERNAME` không đúng namespace Docker Hub mà token được phép ghi.
+
+Cách sửa trên GitHub/Docker Hub:
+
+- Vào Docker Hub tạo lại Personal Access Token có quyền `Read & Write`.
+- Vào GitHub `Settings -> Secrets and variables -> Actions -> Secrets`.
+- Cập nhật `DOCKERHUB_TOKEN` bằng token mới.
+- Kiểm tra `DOCKERHUB_USERNAME` là username/namespace Docker Hub thật, không phải GitHub username hoặc email nếu chúng khác nhau.
+- Sau khi sửa secret, bấm `Re-run jobs` cho workflow CI.
 
 ## 5. Cách test CD developer_build
 
