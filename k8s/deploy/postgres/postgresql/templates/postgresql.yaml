@@ -7,10 +7,6 @@ metadata:
     team: acid
 
 spec:
-  tolerations:
-    - key: "node.kubernetes.io/memory-pressure"
-      operator: "Exists"
-      effect: "NoSchedule"
   streams:
     - applicationId: product_db_stream_appid
       database: product

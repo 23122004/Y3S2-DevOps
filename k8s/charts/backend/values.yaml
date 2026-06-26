@@ -91,6 +91,7 @@ lifecycle:
 terminationGracePeriodSeconds: 45
 
 livenessProbe:
+  timeoutSeconds: 3
   periodSeconds: 10
   failureThreshold: 30
   successThreshold: 1
@@ -99,11 +100,21 @@ livenessProbe:
     port: metric
 
 readinessProbe:
+  timeoutSeconds: 3
   periodSeconds: 10
   failureThreshold: 30
   successThreshold: 1
   httpGet:
     path: /actuator/health/readiness
+    port: metric
+
+startupProbe:
+  timeoutSeconds: 3
+  periodSeconds: 10
+  failureThreshold: 60
+  successThreshold: 1
+  httpGet:
+    path: /actuator/health/liveness
     port: metric
 
 serviceMonitor:
@@ -127,10 +138,10 @@ ingress:
 resources:
   requests:
     cpu: 50m
-    memory: 96Mi
+    memory: 192Mi
   limits:
     cpu: 1000m
-    memory: 384Mi
+    memory: 512Mi
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -151,10 +162,7 @@ autoscaling:
 
 nodeSelector: {}
 
-tolerations:
-  - key: "node.kubernetes.io/memory-pressure"
-    operator: "Exists"
-    effect: "NoSchedule"
+tolerations: []
 
 affinity: {}
 

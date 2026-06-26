@@ -26,7 +26,7 @@ helm upgrade --install swagger-ui "$ChartsDir/swagger-ui" --namespace yas --crea
 
 Start-Sleep -Seconds 5
 
-$charts = @("cart","customer","inventory","location","media","order","payment","payment-paypal","product","promotion","rating","search","tax","recommendation","webhook","sampledata")
+$charts = @("cart","customer","inventory","media","order","product","search","tax","sampledata")
 foreach ($chart in $charts) {
     Write-Host "Updating $chart..."
     helm dependency update "$ChartsDir/$chart"
