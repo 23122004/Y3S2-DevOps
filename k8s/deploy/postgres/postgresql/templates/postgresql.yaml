@@ -7,6 +7,10 @@ metadata:
     team: acid
 
 spec:
+  tolerations:
+    - key: "node.kubernetes.io/memory-pressure"
+      operator: "Exists"
+      effect: "NoSchedule"
   streams:
     - applicationId: product_db_stream_appid
       database: product
@@ -23,7 +27,7 @@ spec:
   volume:
     size: {{ .Values.volumeSize }}
   users:
-    {{ .Values.username }}:
+    {{ .Values.username | quote }}:
       - superuser
       - inherit
       - login
@@ -43,8 +47,8 @@ spec:
     promotion: {{ .Values.username }}
     rating: {{ .Values.username }}
     tax: {{ .Values.username }}
-    recommendation: { { .Values.username } }
-    webhook: { { .Values.username } }
+    recommendation: {{ .Values.username }}
+    webhook: {{ .Values.username }}
     grafana: {{ .Values.username }}
   patroni:
     slots:

@@ -46,7 +46,9 @@ deployment:
     reloader.stakater.com/search: "true"
   extraAnnotations: []
 
-extraEnvs: []
+extraEnvs:
+  - name: JAVA_OPTS
+    value: "-Xms64m -Xmx256m -XX:MaxRAMPercentage=75.0"
 #  - name: EXTRA_VARIABLE_NAME
 #    value: extra variable data
 
@@ -90,7 +92,7 @@ terminationGracePeriodSeconds: 45
 
 livenessProbe:
   periodSeconds: 10
-  failureThreshold: 12
+  failureThreshold: 30
   successThreshold: 1
   httpGet:
     path: /actuator/health/liveness
@@ -98,7 +100,7 @@ livenessProbe:
 
 readinessProbe:
   periodSeconds: 10
-  failureThreshold: 12
+  failureThreshold: 30
   successThreshold: 1
   httpGet:
     path: /actuator/health/readiness
@@ -122,7 +124,13 @@ ingress:
 #    secretName: chart-example-tls
 #    host: chart-example.local
 
-resources: {}
+resources:
+  requests:
+    cpu: 50m
+    memory: 96Mi
+  limits:
+    cpu: 1000m
+    memory: 384Mi
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -143,6 +151,17 @@ autoscaling:
 
 nodeSelector: {}
 
-tolerations: []
+tolerations:
+  - key: "node.kubernetes.io/memory-pressure"
+    operator: "Exists"
+    effect: "NoSchedule"
 
 affinity: {}
+
+hostAliases:
+  - ip: "10.109.21.51"
+    hostnames:
+      - "identity.yas.local.com"
+      - "api.yas.local.com"
+      - "backoffice.yas.local.com"
+      - "storefront.yas.local.com"
