@@ -18,3 +18,10 @@ metadata:
   name: yas
   labels:
     istio-injection: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: yas-developer
+  labels:
+    istio-injection: enabled

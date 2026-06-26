@@ -153,6 +153,38 @@ Tài liệu [implementation-spec.md](file:///d:/Y3S2/%5BDevOps%5D_Project02/docs
   - `DOKS_REGION`: Vùng địa lý của cluster (mặc định: `sgp1`).
   - `BASE_DOMAIN`: Tên miền gốc trỏ tới Load Balancer của DigitalOcean (ví dụ: `yas.example.com`).
 
+### 5.3 Cập nhật phần Khoa - CI/CD Developer Build và Service Mesh
+
+Đã bổ sung tài liệu thao tác chi tiết tại [khoa-ci-cd-service-mesh.md](khoa-ci-cd-service-mesh.md).
+
+Các thay đổi chính:
+
+1. **CI Docker Hub**:
+   - Thêm workflow `.github/workflows/ci.yml`.
+   - Build Docker image cho các service chính khi push mọi branch.
+   - Push image lên Docker Hub với tag commit SHA.
+   - Push thêm tag branch-name và `latest` khi branch là `main`.
+
+2. **CD Developer Build**:
+   - Thêm workflow `.github/workflows/cd-developer.yml`.
+   - Chạy thủ công bằng `workflow_dispatch`.
+   - Deploy vào namespace `yas-developer`.
+   - Cho phép nhập branch riêng cho từng service.
+   - Service chọn branch riêng dùng image tag commit SHA, service còn lại dùng `latest`.
+   - Có action `cleanup` để xóa namespace `yas-developer`.
+
+3. **Service Mesh**:
+   - Thêm thư mục `k8s/istio/`.
+   - Cài Istio `1.30.2` trên DOKS.
+   - Bật sidecar injection cho `yas`, `yas-developer`, `dev`, `staging`, và `ingress-nginx`.
+   - Apply `PeerAuthentication` STRICT, `DestinationRule` ISTIO_MUTUAL, và `VirtualService` retry cho `tax`/`order`.
+   - Public entrypoints `storefront-bff`, `backoffice-bff`, `swagger-ui` được đặt `PERMISSIVE` để tương thích NGINX Ingress.
+
+4. **Trạng thái test thực tế**:
+   - Pod trong namespace `yas` đã chạy `2/2` sau khi inject sidecar.
+   - `storefront.yas.local.com`, `backoffice.yas.local.com`, và `api.yas.local.com/swagger-ui/index.html` trả HTTP `200`.
+   - `istioctl proxy-status` cho thấy proxy trong `yas` và `ingress-nginx` đã sync với `istiod`.
+
 ---
 
 ## 6. Ghi chú Kỹ thuật Quan trọng
