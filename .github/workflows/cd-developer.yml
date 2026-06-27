@@ -11,6 +11,14 @@ on:
         options:
           - deploy
           - cleanup
+      developer_profile:
+        description: "Runtime profile for developer environment"
+        required: true
+        default: "lean"
+        type: choice
+        options:
+          - lean
+          - full
       product_branch:
         description: "Branch for product"
         required: false
@@ -101,6 +109,7 @@ jobs:
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           BASE_DOMAIN: ${{ vars.BASE_DOMAIN }}
+          DEVELOPER_PROFILE: ${{ inputs.developer_profile }}
           PRODUCT_BRANCH: ${{ inputs.product_branch }}
           CART_BRANCH: ${{ inputs.cart_branch }}
           ORDER_BRANCH: ${{ inputs.order_branch }}
@@ -122,6 +131,10 @@ jobs:
           DEVELOPER_HOST="developer.${BASE_DOMAIN}"
           BACKOFFICE_HOST="backoffice-developer.${BASE_DOMAIN}"
           API_HOST="api-developer.${BASE_DOMAIN}"
+          DEVELOPER_PROFILE="${DEVELOPER_PROFILE:-lean}"
+          backend_common_args=()
+          ui_common_args=()
+          swagger_common_args=()
 
           resolve_tag() {
             local branch="$1"
@@ -144,6 +157,41 @@ jobs:
             helm dependency build "./k8s/charts/${chart}" >/dev/null
           }
 
+          configure_developer_profile() {
+            if [ "$DEVELOPER_PROFILE" = "lean" ]; then
+              kubectl label namespace "$NAMESPACE" istio-injection=disabled --overwrite
+              backend_common_args=(
+                --set-string "backend.podAnnotations.sidecar\\.istio\\.io/inject=false"
+                --set "backend.resources.requests.cpu=25m"
+                --set "backend.resources.requests.memory=96Mi"
+                --set "backend.resources.limits.cpu=500m"
+                --set "backend.resources.limits.memory=384Mi"
+                --set-string "backend.extraEnvs[0].name=JAVA_OPTS"
+                --set-string "backend.extraEnvs[0].value=-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+                --set "backend.terminationGracePeriodSeconds=10"
+                --set-string "backend.lifecycle.preStop.exec.command[0]=sh"
+                --set-string "backend.lifecycle.preStop.exec.command[1]=-c"
+                --set-string "backend.lifecycle.preStop.exec.command[2]=sleep 2"
+              )
+              ui_common_args=(
+                --set-string "ui.podAnnotations.sidecar\\.istio\\.io/inject=false"
+                --set "ui.resources.requests.cpu=5m"
+                --set "ui.resources.requests.memory=32Mi"
+                --set "ui.resources.limits.cpu=100m"
+                --set "ui.resources.limits.memory=96Mi"
+              )
+              swagger_common_args=(
+                --set-string "podAnnotations.sidecar\\.istio\\.io/inject=false"
+                --set "resources.requests.cpu=5m"
+                --set "resources.requests.memory=16Mi"
+                --set "resources.limits.cpu=50m"
+                --set "resources.limits.memory=64Mi"
+              )
+            else
+              kubectl label namespace "$NAMESPACE" istio-injection=enabled --overwrite
+            fi
+          }
+
           deploy_backend() {
             local release="$1"
             local image="$2"
@@ -155,6 +203,7 @@ jobs:
               --create-namespace \
               --set "backend.image.repository=${DOCKERHUB_USERNAME}/${image}" \
               --set "backend.image.tag=${tag}" \
+              "${backend_common_args[@]}" \
               "$@"
           }
 
@@ -169,6 +218,7 @@ jobs:
               --create-namespace \
               --set "ui.image.repository=${DOCKERHUB_USERNAME}/${image}" \
               --set "ui.image.tag=${tag}" \
+              "${ui_common_args[@]}" \
               "$@"
           }
 
@@ -182,11 +232,12 @@ jobs:
               --set "ingress.host=${API_HOST}" \
               --set "ingress.hosts[0].host=${API_HOST}" \
               --set "ingress.hosts[0].paths[0].path=/swagger-ui" \
-              --set "ingress.hosts[0].paths[0].pathType=ImplementationSpecific"
+              --set "ingress.hosts[0].paths[0].pathType=ImplementationSpecific" \
+              "${swagger_common_args[@]}"
           }
 
           kubectl apply -f k8s/namespaces.yaml
-          kubectl label namespace "$NAMESPACE" istio-injection=enabled --overwrite
+          configure_developer_profile
 
           helm dependency build ./k8s/charts/yas-configuration >/dev/null
           helm upgrade --install yas-configuration ./k8s/charts/yas-configuration \
@@ -223,24 +274,25 @@ jobs:
           deploy_ui backoffice-ui yas-backoffice-ui "$backoffice_ui_tag"
           deploy_backend storefront-bff yas-storefront-bff "$storefront_bff_tag" \
             --set "backend.ingress.host=${DEVELOPER_HOST}" \
-            --set "backend.extraEnvs[0].name=SPRING_PROFILES_ACTIVE" \
-            --set "backend.extraEnvs[0].value=prod" \
-            --set "backend.extraEnvs[1].name=UI_HOST" \
-            --set "backend.extraEnvs[1].value=http://storefront-ui:3000"
+            --set "backend.extraEnvs[1].name=SPRING_PROFILES_ACTIVE" \
+            --set "backend.extraEnvs[1].value=prod" \
+            --set "backend.extraEnvs[2].name=UI_HOST" \
+            --set "backend.extraEnvs[2].value=http://storefront-ui:3000"
           deploy_backend backoffice-bff yas-backoffice-bff "$backoffice_bff_tag" \
             --set "backend.ingress.host=${BACKOFFICE_HOST}" \
-            --set "backend.extraEnvs[0].name=SPRING_PROFILES_ACTIVE" \
-            --set "backend.extraEnvs[0].value=prod" \
-            --set "backend.extraEnvs[1].name=UI_HOST" \
-            --set "backend.extraEnvs[1].value=http://backoffice-ui:3000"
+            --set "backend.extraEnvs[1].name=SPRING_PROFILES_ACTIVE" \
+            --set "backend.extraEnvs[1].value=prod" \
+            --set "backend.extraEnvs[2].name=UI_HOST" \
+            --set "backend.extraEnvs[2].value=http://backoffice-ui:3000"
           deploy_swagger "$swagger_ui_tag"
 
-          kubectl rollout status deployment -n "$NAMESPACE" --timeout=10m
+          kubectl rollout status deployment -n "$NAMESPACE" --timeout=15m
 
           lb_ip="$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
           {
             echo "### Developer environment"
             echo ""
+            echo "- Profile: ${DEVELOPER_PROFILE}"
             echo "- Storefront: http://${DEVELOPER_HOST}"
             echo "- Backoffice: http://${BACKOFFICE_HOST}"
             echo "- Swagger UI: http://${API_HOST}/swagger-ui/index.html"
@@ -270,4 +322,3 @@ jobs:
         run: |
           kubectl delete namespace "$NAMESPACE" --ignore-not-found=true
           echo "Developer namespace ${NAMESPACE} cleaned up."
-
