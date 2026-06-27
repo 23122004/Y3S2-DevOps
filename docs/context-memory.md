@@ -171,12 +171,13 @@ Các thay đổi chính:
    - Deploy vào namespace `yas-developer`.
    - Cho phép nhập branch riêng cho từng service.
    - Service chọn branch riêng dùng image tag commit SHA, service còn lại dùng `latest`.
+   - Có `developer_profile=lean/full`: `lean` là workaround cho cluster thiếu RAM, tắt Istio sidecar riêng ở `yas-developer`; `full` giữ sidecar/mTLS cho developer environment khi cluster đủ tài nguyên.
    - Có action `cleanup` để xóa namespace `yas-developer`.
 
 3. **Service Mesh**:
    - Thêm thư mục `k8s/istio/`.
    - Cài Istio `1.30.2` trên DOKS.
-   - Bật sidecar injection cho `yas`, `yas-developer`, `dev`, `staging`, và `ingress-nginx`.
+   - Bật sidecar injection cho `yas`, `dev`, `staging`, và `ingress-nginx`; `yas-developer` có thể chạy `full` để bật sidecar hoặc `lean` để giảm RAM khi demo CD.
    - Apply `PeerAuthentication` STRICT, `DestinationRule` ISTIO_MUTUAL, và `VirtualService` retry cho `tax`/`order`.
    - Public entrypoints `storefront-bff`, `backoffice-bff`, `swagger-ui` được đặt `PERMISSIVE` để tương thích NGINX Ingress.
 

@@ -55,6 +55,7 @@ Workflow này:
 
 - Chạy thủ công bằng `workflow_dispatch`.
 - Có input `action` gồm `deploy` hoặc `cleanup`.
+- Có input `developer_profile` gồm `lean` hoặc `full`.
 - Deploy vào namespace:
 
 ```text
@@ -65,6 +66,41 @@ yas-developer
 - Nếu input branch là `main`, workflow dùng image tag `latest`.
 - Nếu input branch khác `main`, workflow resolve commit SHA cuối của branch đó rồi deploy image đúng SHA.
 - In URL và hosts entries vào GitHub Actions summary.
+
+`developer_profile=lean` là profile mặc định để tránh tràn RAM trên cluster lab:
+
+- Tắt Istio sidecar riêng cho namespace `yas-developer`.
+- Giảm memory request/limit của backend, UI, và swagger-ui.
+- Giảm Java heap của backend.
+- Tăng rollout timeout lên 15 phút.
+
+`developer_profile=full` giữ Istio sidecar cho `yas-developer`, phù hợp khi cluster đủ RAM hoặc cần demo developer environment nằm trong mesh.
+
+### Ghi chú quan trọng về `developer_profile=lean`
+
+`developer_profile=lean` là cấu hình workaround để chạy được CD trên cluster lab đang thiếu RAM. Cấu hình này khác bản service-mesh đầy đủ ở điểm:
+
+- Namespace `yas-developer` được label `istio-injection=disabled`.
+- Pod trong `yas-developer` không có `istio-proxy`, nên thường là `1/1` thay vì `2/2`.
+- Developer environment ở profile này không dùng mTLS sidecar-to-sidecar.
+- Đây là bản dùng để chứng minh pipeline `developer_build`: chọn branch, resolve commit SHA, deploy image đúng tag, expose URL, và cleanup.
+
+Profile này không thay thế phần chứng minh Service Mesh của bài. Phần Service Mesh vẫn được chứng minh bằng:
+
+- Istio đã cài trên cluster.
+- Namespace `yas`, `dev`, `staging` vẫn có thể bật `istio-injection=enabled`.
+- Namespace `yas` đã chạy pod `2/2` với `istio-proxy`.
+- `PeerAuthentication` STRICT, `DestinationRule` ISTIO_MUTUAL, và `VirtualService` retry vẫn nằm trong `k8s/istio/`.
+- Khi cluster đủ RAM, chạy CD với `developer_profile=full` để `yas-developer` cũng nằm trong mesh.
+
+Nói ngắn gọn:
+
+```text
+lean = dùng để chạy CD developer_build trên cluster thiếu RAM
+full = dùng để demo developer environment có Istio sidecar/mTLS đầy đủ
+```
+
+Lý do thêm profile `lean`: cluster hiện chỉ có 2 node `s-4vcpu-8gb`, nhưng đang chạy sẵn `yas`, ArgoCD, Kafka, Elasticsearch, Keycloak, Redis, Postgres, observability, ingress-nginx, và Istio. Khi deploy thêm toàn bộ `yas-developer` với sidecar, node bị `MemoryPressure` và pod bị `Pending`.
 
 Domain developer theo hướng bám sát đề bài:
 
@@ -275,6 +311,7 @@ CD - Developer Build
 
 ```text
 action = deploy
+developer_profile = lean
 ```
 
 6. Nhập branch cho service cần test.
@@ -299,7 +336,43 @@ Workflow sẽ:
 - Deploy `tax` bằng image tag SHA đó.
 - Deploy các service còn lại bằng tag `latest`.
 - Deploy vào namespace `yas-developer`.
+- Với `developer_profile=lean`, deploy bản tiết kiệm RAM để tránh pod `Pending` do thiếu memory.
 - In URL test và hosts entries trong summary.
+
+### Nếu CD fail ở rollout do thiếu memory
+
+Triệu chứng:
+
+```text
+Waiting for deployment "backoffice-bff" rollout to finish: 0 of 1 updated replicas are available...
+deployment "..." exceeded its progress deadline
+0/2 nodes are available: Insufficient memory
+node.kubernetes.io/memory-pressure:NoSchedule
+```
+
+Nguyên nhân thường gặp trong cluster lab:
+
+- Cluster chỉ có 2 node `s-4vcpu-8gb`.
+- Trên cluster đã chạy sẵn `yas`, ArgoCD, Kafka, Elasticsearch, Keycloak, Redis, Postgres, observability, Istio.
+- CD developer deploy thêm một bản YAS thứ hai trong `yas-developer`.
+- Nếu bật Istio sidecar, mỗi app pod thành `2/2`, tốn thêm RAM.
+
+Cách xử lý:
+
+1. Chạy cleanup trước:
+
+```text
+action = cleanup
+```
+
+2. Chạy lại deploy với:
+
+```text
+action = deploy
+developer_profile = lean
+```
+
+3. Nếu vẫn thiếu RAM, cần giảm scope deploy hoặc tăng node/RAM cho cluster.
 
 ## 6. Hosts file để test Developer environment
 
