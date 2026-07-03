@@ -1,15 +1,13 @@
-name: CI - Build Docker Hub Images
+name: CD - Deploy Staging
 
 on:
   push:
-    branches-ignore:
-      - "main"
-    tags-ignore:
-      - "v*"
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-and-push:
@@ -106,12 +104,7 @@ jobs:
         shell: bash
         run: |
           image="${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}"
-          tags="${image}:${{ github.sha }}"
-          safe_branch="$(echo "${{ github.ref_name }}" | tr '/_' '--' | tr -cd '[:alnum:].-')"
-          tags="${tags},${image}:${safe_branch}"
-          if [ "${{ github.ref_name }}" = "main" ]; then
-            tags="${tags},${image}:latest"
-          fi
+          tags="${image}:${{ github.ref_name }}"
           echo "tags=${tags}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
@@ -122,3 +115,46 @@ jobs:
           tags: ${{ steps.tags.outputs.tags }}
           cache-from: type=gha,scope=${{ matrix.image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+  deploy:
+    name: Update GitOps Config
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Update tags in values.yaml
+        shell: bash
+        run: |
+          sed -i "s|DOCKERHUB_USERNAME|${{ secrets.DOCKERHUB_USERNAME }}|g" k8s/environments/staging/values.yaml
+          
+          yq -i '.product.backend.image.tag = "${{ github.ref_name }}"' k8s/environments/staging/values.yaml
+          yq -i '.cart.backend.image.tag = "${{ github.ref_name }}"' k8s/environments/staging/values.yaml
+          yq -i '.order.backend.image.tag = "${{ github.ref_name }}"' k8s/environments/staging/values.yaml
+          yq -i '.customer.backend.image.tag = "${{ github.ref_name }}"' k8s/environments/staging/values.yaml
+          yq -i '.inventory.backend.image.tag = "${{ github.ref_name }}"' k8s/environments/staging/values.yaml
+          yq -i '.tax.backend.image.tag = "${{ github.ref_name }}"' k8s/environments/staging/values.yaml
+          yq -i '.media.backend.image.tag = "${{ github.ref_name }}"' k8s/environments/staging/values.yaml
+          yq -i '.search.backend.image.tag = "${{ github.ref_name }}"' k8s/environments/staging/values.yaml
+          yq -i '.sampledata.backend.image.tag = "${{ github.ref_name }}"' k8s/environments/staging/values.yaml
+          
+          yq -i '.storefront-ui.ui.image.tag = "${{ github.ref_name }}"' k8s/environments/staging/values.yaml
+          yq -i '.backoffice-ui.ui.image.tag = "${{ github.ref_name }}"' k8s/environments/staging/values.yaml
+          
+          yq -i '.storefront-bff.backend.image.tag = "${{ github.ref_name }}"' k8s/environments/staging/values.yaml
+          yq -i '.backoffice-bff.backend.image.tag = "${{ github.ref_name }}"' k8s/environments/staging/values.yaml
+          
+          yq -i '.swagger-ui.image.tag = "${{ github.ref_name }}"' k8s/environments/staging/values.yaml
+
+      - name: Commit and push changes
+        shell: bash
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add k8s/environments/staging/values.yaml
+          git commit -m "chore(staging): update image tags to ${{ github.ref_name }} [skip ci]" || exit 0
+          git push origin main
