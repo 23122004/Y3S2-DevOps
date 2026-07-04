@@ -191,6 +191,8 @@ storefront-bff:
         value: prod
       - name: UI_HOST
         value: "http://storefront-ui:3000"
+      - name: SPRING_CLOUD_GATEWAY_ROUTES_0_URI
+        value: "http://nginx-staging"
       - name: JAVA_OPTS
         value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
     ingress:
@@ -213,6 +215,8 @@ backoffice-bff:
         value: prod
       - name: UI_HOST
         value: "http://backoffice-ui:3000"
+      - name: SPRING_CLOUD_GATEWAY_ROUTES_0_URI
+        value: "http://nginx-staging"
       - name: JAVA_OPTS
         value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
     ingress:
