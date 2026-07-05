@@ -1,6 +1,7 @@
 # Compiled class file
 *.class
 teammate-kubeconfig.yaml
+.claude/
 
 # Log file
 *.log
