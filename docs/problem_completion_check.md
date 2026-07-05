@@ -1,6 +1,6 @@
 # Problem Completion Check — YAS CD System
 
-**Checked:** 2026-07-05 · **Method:** live `kubectl` against the real cluster (`teammate-kubeconfig.yaml`) + repo manifest/workflow inspection.
+**Checked:** 2026-07-05 (re-verified after observability revival) · **Method:** live `kubectl` against the real cluster (`teammate-kubeconfig.yaml`) + repo manifest/workflow inspection.
 
 > **Cluster note:** The graded/live cluster is the **DigitalOcean managed K8s** `do-sgp1-...` (reachable via `teammate-kubeconfig.yaml`), **not** the local `minikube` (which is empty). All "live" checks below ran against DigitalOcean.
 
@@ -19,7 +19,7 @@
 | Advanced 1: ArgoCD | ⚠️ **Partial** — installed & Synced, but apps Degraded |
 | Advanced 2: Service Mesh | ✅ **Fully live & tested** |
 | 14 core services | ✅ All live in `yas` ns (2/2, sidecar-injected) |
-| Observability (out of scope) | ⚠️ Deployed but **scaled to 0** (not live) |
+| Observability (out of scope) | ✅ **Revived & live** — full LGTM+Prometheus stack (this session) |
 
 **Bottom line:** Service mesh (Advanced 2) is complete and enforcing. Core 14 services run live in the `yas` namespace. The **base dev/staging pipeline and ArgoCD (Advanced 1) are broken in the live cluster** because the ArgoCD-rendered deployments carry an unsubstituted `DOCKERHUB_USERNAME` placeholder image and only render `swagger-ui`.
 
@@ -92,13 +92,23 @@ Plus mesh demo infra: `httpbin`, `mesh-tester-order`, `mesh-tester-default`, `ya
 
 ---
 
-## Observability — ⚠️ DEPLOYED BUT NOT LIVE (out of scope)
+## Observability — ✅ REVIVED & LIVE (out of scope but now working)
 
-Problem explicitly states "No need to deploy Grafana and Prometheus." Current state:
-- Full LGTM+Prom stack **installed** in `observability` ns (grafana, loki read/write/backend/minio, tempo, prometheus, alertmanager, otel-collector/operator, grafana-operator).
-- **All core components scaled to `desired=0`** → not running. Only lightweight agents up: `promtail` (3), `node-exporter` (3), `loki-canary` (3).
-- Separate `prometheus` in `istio-system` **is** running (backs Kiali).
-- Matches worklog cost note (scale down heavy observability after demo). **Dashboards/traces/metrics are NOT queryable right now.** Spin components back up before any observability demo.
+Problem explicitly states "No need to deploy Grafana and Prometheus." It was previously scaled to 0; **this session scaled the full stack back up** and verified it functional. Current live state (`observability` ns, 23 pods Running, all ready):
+
+| Component | Live evidence |
+|-----------|---------------|
+| **Grafana** | 1/1, `GET /api/health` → `{"database":"ok","version":"13.1.0"}`. Ingress `grafana.yas.local.com`. Login admin/admin. |
+| **Prometheus** | 1/1, `/-/healthy` → 200, **20 active targets UP**. Operator-managed (kube-prometheus-stack). |
+| **Loki** | write/read/backend/minio/gateway all 1/1 (scalable mode, filesystem+minio). |
+| **Tempo** | 1/1 (traces, metrics-generator remote-writes to Prometheus). |
+| **Alertmanager** | 1/1. |
+| **OTel Collector** | 1/1 (receives app telemetry). |
+| Agents | promtail (3), node-exporter (3), loki-canary (3) DaemonSets — were already up. |
+
+- Separate `prometheus` in `istio-system` also running (backs Kiali) — unchanged.
+- **How revived:** all workloads were `desired=0`; scaled operators up first (prometheus-operator reconciled Prometheus + Alertmanager CRs back to 1), then scaled the remaining Deployments/StatefulSets to 1. Fits on the near-empty 3rd node. Commands in `worklog-2026-07-05.md` §10.
+- ⚠️ Manual `kubectl scale` — a future `helm upgrade`/reinstall from `k8s/deploy/setup-cluster.sh` reasserts intended replicas (also 1), so this is consistent, not a drift risk.
 
 ---
 
@@ -106,5 +116,6 @@ Problem explicitly states "No need to deploy Grafana and Prometheus." Current st
 
 1. **Fix ArgoCD dev/staging images** — substitute real Docker Hub username for `DOCKERHUB_USERNAME` in `k8s/environments/{dev,staging}/values.yaml`; make the umbrella render all 14 services, not just swagger-ui. This unblocks base req 5 **and** Advanced 1.
 2. **Decide dev/staging vs `yas`** — the live app lives in `yas`; base req wants `dev`/`staging`. Align.
-3. **(Optional) Observability** — scale the `observability` stack back up if it must be demoed; otherwise out of scope.
+3. ~~**(Optional) Observability**~~ — ✅ **Done this session.** Full LGTM+Prometheus stack revived and verified live. Keep the 3rd node up while it runs.
 4. **(Cosmetic) Jenkins** — spec names Jenkins for delete/dev/staging; implementation is GitHub Actions. Allowed, but note in report.
+5. **(New) GitOps branch-mismatch bug** — `deploy-dev`/`deploy-staging` sed+commit substituted values to `main`, but ArgoCD apps track `feat/pipeline-cd`. Even a correct pipeline run never reaches ArgoCD. Repoint apps to `main` (or make workflows commit to the tracked branch) when fixing Docker Hub.
