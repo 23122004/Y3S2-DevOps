@@ -1,28 +1,28 @@
 # Khoa - CI/CD Developer Build and Service Mesh
 
-Tài liệu này ghi lại phần việc của Khoa trong Project02: CI build Docker image theo commit SHA, CD `developer_build`, cleanup môi trường developer, và cấu hình Istio Service Mesh.
+This document records Khoa's work in Project02: CI Docker image build by commit SHA, CD `developer_build`, developer environment cleanup, and Istio Service Mesh configuration.
 
-## 1. Những gì đã làm
+## 1. What Was Done
 
 ### CI Docker Hub
 
-Đã thêm workflow:
+Added workflow:
 
 ```text
 .github/workflows/ci.yml
 ```
 
-Workflow này:
+This workflow:
 
-- Chạy khi push lên mọi branch.
-- Với backend service, chạy Maven package trước để tạo `target/*.jar`.
-- Build Docker image cho các service chính.
-- Push image lên Docker Hub.
-- Tag image bằng commit SHA, ví dụ `yas-tax:<commit_sha>`.
-- Tag thêm bằng tên branch đã sanitize, ví dụ `yas-tax:feature-tax`.
-- Nếu push lên `main`, push thêm tag `latest`.
+- Runs on push to any branch.
+- For backend services, runs Maven package first to create `target/*.jar`.
+- Builds Docker images for the main services.
+- Pushes images to Docker Hub.
+- Tags images with the commit SHA, e.g., `yas-tax:<commit_sha>`.
+- Also tags with the sanitized branch name, e.g., `yas-tax:feature-tax`.
+- If pushed to `main`, also pushes the `latest` tag.
 
-Các image được build:
+Images built:
 
 ```text
 yas-product
@@ -41,68 +41,68 @@ yas-sampledata
 yas-swagger-ui
 ```
 
-`swagger-ui/Dockerfile` được thêm để CI có thể build image `yas-swagger-ui` theo đúng danh sách service cần demo.
+`swagger-ui/Dockerfile` was added so CI can build the `yas-swagger-ui` image according to the list of services needed for the demo.
 
 ### CD Developer Build
 
-Đã thêm workflow:
+Added workflow:
 
 ```text
 .github/workflows/cd-developer.yml
 ```
 
-Workflow này:
+This workflow:
 
-- Chạy thủ công bằng `workflow_dispatch`.
-- Có input `action` gồm `deploy` hoặc `cleanup`.
-- Có input `developer_profile` gồm `lean` hoặc `full`.
-- Deploy vào namespace:
+- Runs manually via `workflow_dispatch`.
+- Has an `action` input with `deploy` or `cleanup`.
+- Has a `developer_profile` input with `lean` or `full`.
+- Deploys to namespace:
 
 ```text
 yas-developer
 ```
 
-- Cho phép nhập branch riêng cho từng service.
-- Nếu input branch là `main`, workflow dùng image tag `latest`.
-- Nếu input branch khác `main`, workflow resolve commit SHA cuối của branch đó rồi deploy image đúng SHA.
-- In URL và hosts entries vào GitHub Actions summary.
+- Allows entering individual branch names for each service.
+- If the input branch is `main`, the workflow uses the `latest` image tag.
+- If the input branch is not `main`, the workflow resolves the latest commit SHA of that branch and deploys the image with that SHA.
+- Prints URL and hosts entries in the GitHub Actions summary.
 
-`developer_profile=lean` là profile mặc định để tránh tràn RAM trên cluster lab:
+`developer_profile=lean` is the default profile to avoid RAM overflow on the lab cluster:
 
-- Tắt Istio sidecar riêng cho namespace `yas-developer`.
-- Giảm memory request/limit của backend, UI, và swagger-ui.
-- Giảm Java heap của backend.
-- Tăng rollout timeout lên 15 phút.
+- Disables Istio sidecar specifically for the `yas-developer` namespace.
+- Reduces memory request/limit for backend, UI, and swagger-ui.
+- Reduces Java heap for backend.
+- Increases rollout timeout to 15 minutes.
 
-`developer_profile=full` giữ Istio sidecar cho `yas-developer`, phù hợp khi cluster đủ RAM hoặc cần demo developer environment nằm trong mesh.
+`developer_profile=full` keeps Istio sidecar for `yas-developer`, suitable when the cluster has enough RAM or when you need to demonstrate the developer environment within the mesh.
 
-### Ghi chú quan trọng về `developer_profile=lean`
+### Important Notes on `developer_profile=lean`
 
-`developer_profile=lean` là cấu hình workaround để chạy được CD trên cluster lab đang thiếu RAM. Cấu hình này khác bản service-mesh đầy đủ ở điểm:
+`developer_profile=lean` is a workaround configuration to run CD on a lab cluster with insufficient RAM. This configuration differs from the full service-mesh version in the following ways:
 
-- Namespace `yas-developer` được label `istio-injection=disabled`.
-- Pod trong `yas-developer` không có `istio-proxy`, nên thường là `1/1` thay vì `2/2`.
-- Developer environment ở profile này không dùng mTLS sidecar-to-sidecar.
-- Đây là bản dùng để chứng minh pipeline `developer_build`: chọn branch, resolve commit SHA, deploy image đúng tag, expose URL, và cleanup.
+- The `yas-developer` namespace is labeled `istio-injection=disabled`.
+- Pods in `yas-developer` do not have `istio-proxy`, so they are typically `1/1` instead of `2/2`.
+- The developer environment in this profile does not use mTLS sidecar-to-sidecar.
+- This is used to demonstrate the `developer_build` pipeline: select a branch, resolve commit SHA, deploy the correct image tag, expose URL, and cleanup.
 
-Profile này không thay thế phần chứng minh Service Mesh của bài. Phần Service Mesh vẫn được chứng minh bằng:
+This profile does not replace the Service Mesh demonstration for the assignment. The Service Mesh portion is still demonstrated by:
 
-- Istio đã cài trên cluster.
-- Namespace `yas`, `dev`, `staging` vẫn có thể bật `istio-injection=enabled`.
-- Namespace `yas` đã chạy pod `2/2` với `istio-proxy`.
-- `PeerAuthentication` STRICT, `DestinationRule` ISTIO_MUTUAL, và `VirtualService` retry vẫn nằm trong `k8s/istio/`.
-- Khi cluster đủ RAM, chạy CD với `developer_profile=full` để `yas-developer` cũng nằm trong mesh.
+- Istio installed on the cluster.
+- Namespaces `yas`, `dev`, `staging` can still have `istio-injection=enabled`.
+- The `yas` namespace already runs pods `2/2` with `istio-proxy`.
+- `PeerAuthentication` STRICT, `DestinationRule` ISTIO_MUTUAL, and `VirtualService` retry are still in `k8s/istio/`.
+- When the cluster has enough RAM, run CD with `developer_profile=full` so `yas-developer` is also in the mesh.
 
-Nói ngắn gọn:
+In short:
 
 ```text
-lean = dùng để chạy CD developer_build trên cluster thiếu RAM
-full = dùng để demo developer environment có Istio sidecar/mTLS đầy đủ
+lean = used to run CD developer_build on a cluster with insufficient RAM
+full = used to demo developer environment with full Istio sidecar/mTLS
 ```
 
-Lý do thêm profile `lean`: cluster hiện chỉ có 2 node `s-4vcpu-8gb`, nhưng đang chạy sẵn `yas`, ArgoCD, Kafka, Elasticsearch, Keycloak, Redis, Postgres, observability, ingress-nginx, và Istio. Khi deploy thêm toàn bộ `yas-developer` với sidecar, node bị `MemoryPressure` và pod bị `Pending`.
+Reason for adding the `lean` profile: the cluster currently has only 2 nodes `s-4vcpu-8gb`, but is already running `yas`, ArgoCD, Kafka, Elasticsearch, Keycloak, Redis, Postgres, observability, ingress-nginx, and Istio. When deploying the full `yas-developer` with sidecars, nodes experience `MemoryPressure` and pods go `Pending`.
 
-Domain developer theo hướng bám sát đề bài:
+Developer domains following the assignment requirements:
 
 ```text
 developer.yas.local.com
@@ -110,17 +110,17 @@ backoffice-developer.yas.local.com
 api-developer.yas.local.com
 ```
 
-Các domain này trỏ về Load Balancer của ingress controller.
+These domains point to the Load Balancer of the ingress controller.
 
 ### Istio Service Mesh
 
-Đã thêm thư mục:
+Added directory:
 
 ```text
 k8s/istio/
 ```
 
-Các file chính:
+Main files:
 
 ```text
 k8s/istio/peer-authentication.yaml
@@ -132,25 +132,25 @@ k8s/istio/install-istio.sh
 k8s/istio/README.md
 ```
 
-Đã cài Istio `1.30.2` lên cluster DOKS và apply cấu hình:
+Installed Istio `1.30.2` on the DOKS cluster and applied configuration:
 
-- Namespace `yas`, `yas-developer`, `dev`, `staging` bật `istio-injection=enabled`.
-- Namespace `ingress-nginx` cũng bật injection để public ingress đi qua Envoy.
-- Pod trong namespace `yas` đã restart và có `istio-proxy`.
-- `PeerAuthentication` bật `STRICT` mTLS ở namespace chính.
-- `DestinationRule` dùng `ISTIO_MUTUAL`.
-- `VirtualService` retry cho `tax` và `order`.
-- Public entrypoints `storefront-bff`, `backoffice-bff`, `swagger-ui` đặt `PERMISSIVE` để NGINX Ingress vẫn truy cập được, backend services vẫn chịu policy `STRICT`.
+- Namespaces `yas`, `yas-developer`, `dev`, `staging` have `istio-injection=enabled`.
+- The `ingress-nginx` namespace also has injection enabled so public ingress traffic goes through Envoy.
+- Pods in the `yas` namespace have restarted and have `istio-proxy`.
+- `PeerAuthentication` set to `STRICT` mTLS in the main namespaces.
+- `DestinationRule` uses `ISTIO_MUTUAL`.
+- `VirtualService` retry for `tax` and `order`.
+- Public entrypoints `storefront-bff`, `backoffice-bff`, `swagger-ui` set to `PERMISSIVE` so NGINX Ingress can still access them, while backend services still follow `STRICT` policy.
 
-## 2. GitHub Secrets và Variables cần có
+## 2. Required GitHub Secrets and Variables
 
-Vào GitHub repository:
+Go to GitHub repository:
 
 ```text
 Settings -> Secrets and variables -> Actions
 ```
 
-Tab `Secrets`, cần có:
+`Secrets` tab, need:
 
 ```text
 DOCKERHUB_USERNAME
@@ -158,34 +158,34 @@ DOCKERHUB_TOKEN
 DIGITALOCEAN_ACCESS_TOKEN
 ```
 
-Tab `Variables`, cần có:
+`Variables` tab, need:
 
 ```text
 DOKS_CLUSTER_NAME
 BASE_DOMAIN
 ```
 
-Giá trị `BASE_DOMAIN` đang dùng:
+Current `BASE_DOMAIN` value:
 
 ```text
 yas.local.com
 ```
 
-`DOKS_CLUSTER_NAME` phải đúng tên cluster DigitalOcean Kubernetes mà workflow dùng để chạy:
+`DOKS_CLUSTER_NAME` must match the actual DigitalOcean Kubernetes cluster name the workflow uses to run:
 
 ```bash
 doctl kubernetes cluster kubeconfig save "$DOKS_CLUSTER_NAME"
 ```
 
-## 3. Cách commit và push
+## 3. How to Commit and Push
 
-Kiểm tra file đã thay đổi:
+Check changed files:
 
 ```bash
 git status
 ```
 
-Add các file của phần Khoa:
+Add Khoa's files:
 
 ```bash
 git add .github/workflows/ci.yml
@@ -203,145 +203,145 @@ Commit:
 git commit -m "feat: add developer ci cd and istio service mesh"
 ```
 
-Push branch hiện tại:
+Push current branch:
 
 ```bash
 git push origin feat/pipeline-cd
 ```
 
-Nếu bạn đang ở branch khác, thay `feat/pipeline-cd` bằng tên branch đang dùng:
+If you are on a different branch, replace `feat/pipeline-cd` with your current branch name:
 
 ```bash
 git branch --show-current
 git push origin <branch-name>
 ```
 
-## 4. Cách test CI sau khi push
+## 4. How to Test CI After Push
 
-Sau khi push, GitHub Actions sẽ tự chạy:
+After pushing, GitHub Actions will automatically run:
 
 ```text
 CI - Build Docker Hub Images
 ```
 
-Kiểm tra:
+Check:
 
-1. Vào GitHub repo.
-2. Mở tab `Actions`.
-3. Chọn workflow `CI - Build Docker Hub Images`.
-4. Chọn run mới nhất của branch vừa push.
-5. Chờ các job trong matrix build xong.
+1. Go to GitHub repo.
+2. Open the `Actions` tab.
+3. Select the workflow `CI - Build Docker Hub Images`.
+4. Select the latest run for the branch you just pushed.
+5. Wait for the matrix jobs to finish building.
 
-CI được xem là hoàn thành khi:
+CI is considered complete when:
 
-- Workflow status màu xanh.
-- Các job service đều pass.
-- Trong log có bước `Log in to Docker Hub`.
-- Với backend, trong log có bước `Build backend jar`.
-- Trong log có bước `Build and push`.
-- Docker Hub xuất hiện image tag commit SHA.
+- Workflow status is green.
+- All service jobs pass.
+- The log shows the `Log in to Docker Hub` step.
+- For backend, the log shows the `Build backend jar` step.
+- The log shows the `Build and push` step.
+- Docker Hub shows the commit SHA image tag.
 
-Ví dụ nếu commit SHA là:
+For example, if commit SHA is:
 
 ```text
 abc123...
 ```
 
-thì Docker Hub phải có image:
+then Docker Hub must have images:
 
 ```text
 <DOCKERHUB_USERNAME>/yas-product:abc123...
 <DOCKERHUB_USERNAME>/yas-tax:abc123...
 ```
 
-Nếu branch là `main`, kiểm tra thêm tag:
+If the branch is `main`, also check for the tag:
 
 ```text
 latest
 ```
 
-Lưu ý: CD developer dùng `latest` cho các service để `main`. Vì vậy trước khi chạy CD developer với nhiều input `main`, cần bảo đảm Docker Hub đã có các image `latest`. Cách chắc nhất là merge/push `main` để CI tạo `latest`, hoặc chọn branch cụ thể cho service cần test sau khi CI của branch đó đã chạy xong.
+Note: CD developer uses `latest` for services set to `main`. So before running CD developer with many `main` inputs, ensure Docker Hub already has the `latest` images. The safest way is to merge/push to `main` so CI creates `latest`, or select a specific branch for the service you need to test after CI for that branch has finished.
 
-### Nếu CI fail toàn bộ job
+### If CI Fails All Jobs
 
-Run đầu tiên trên branch `feat/pipeline-cd` đã fail ở bước `Build and push`, có 2 nhóm lỗi:
+The first run on the `feat/pipeline-cd` branch failed at the `Build and push` step, with two error groups:
 
-1. Backend service fail với lỗi:
+1. Backend service failed with error:
 
 ```text
 lstat /target: no such file or directory
 ```
 
-Nguyên nhân: Dockerfile backend copy `target/*.jar`, nhưng workflow lúc đầu chưa chạy Maven package. Đã sửa bằng bước `Build backend jar`.
+Cause: The backend Dockerfile copies `target/*.jar`, but the workflow initially did not run Maven package. Fixed by adding the `Build backend jar` step.
 
-2. UI/static service fail với lỗi:
+2. UI/static service failed with error:
 
 ```text
 401 Unauthorized: access token has insufficient scopes
 ```
 
-Nguyên nhân: `DOCKERHUB_TOKEN` đăng nhập được nhưng chưa có quyền push image, hoặc `DOCKERHUB_USERNAME` không đúng namespace Docker Hub mà token được phép ghi.
+Cause: `DOCKERHUB_TOKEN` could log in but did not have permission to push images, or `DOCKERHUB_USERNAME` did not match the Docker Hub namespace the token was allowed to write to.
 
-Cách sửa trên GitHub/Docker Hub:
+Fix on GitHub/Docker Hub:
 
-- Vào Docker Hub tạo lại Personal Access Token có quyền `Read & Write`.
-- Vào GitHub `Settings -> Secrets and variables -> Actions -> Secrets`.
-- Cập nhật `DOCKERHUB_TOKEN` bằng token mới.
-- Kiểm tra `DOCKERHUB_USERNAME` là username/namespace Docker Hub thật, không phải GitHub username hoặc email nếu chúng khác nhau.
-- Sau khi sửa secret, bấm `Re-run jobs` cho workflow CI.
+- Go to Docker Hub and create a new Personal Access Token with `Read & Write` permissions.
+- Go to GitHub `Settings -> Secrets and variables -> Actions -> Secrets`.
+- Update `DOCKERHUB_TOKEN` with the new token.
+- Verify `DOCKERHUB_USERNAME` is the actual Docker Hub username/namespace, not a GitHub username or email if they differ.
+- After updating the secret, click `Re-run jobs` for the CI workflow.
 
-## 5. Cách test CD developer_build
+## 5. How to Test CD developer_build
 
-Chỉ chạy CD sau khi CI đã build xong image cần deploy.
+Only run CD after CI has finished building the images needed for deployment.
 
-Lưu ý quan trọng: workflow chạy thủ công bằng `workflow_dispatch` thường chỉ hiện ổn định trong tab GitHub Actions sau khi file `.github/workflows/cd-developer.yml` đã có trên default branch của repository. Nếu push lên branch `feat/pipeline-cd` mà chưa thấy workflow `CD - Developer Build`, hãy mở PR và merge workflow này vào `main` trước, sau đó quay lại tab Actions để chạy CD.
+Important note: workflows triggered manually via `workflow_dispatch` usually only appear stably in the GitHub Actions tab after the `.github/workflows/cd-developer.yml` file is on the default branch of the repository. If you push to the `feat/pipeline-cd` branch but don't see the `CD - Developer Build` workflow, open a PR and merge this workflow into `main` first, then return to the Actions tab to run CD.
 
-Trên GitHub:
+On GitHub:
 
-1. Vào tab `Actions`.
-2. Chọn workflow:
+1. Go to the `Actions` tab.
+2. Select the workflow:
 
 ```text
 CD - Developer Build
 ```
 
-3. Bấm `Run workflow`.
-4. Chọn branch chứa workflow.
-5. Chọn:
+3. Click `Run workflow`.
+4. Select the branch containing the workflow.
+5. Select:
 
 ```text
 action = deploy
 developer_profile = lean
 ```
 
-6. Nhập branch cho service cần test.
+6. Enter the branch for the service you need to test.
 
-Ví dụ developer sửa `tax` ở branch:
+For example, if a developer modified `tax` on branch:
 
 ```text
 dev_tax_service
 ```
 
-thì nhập:
+then enter:
 
 ```text
 tax_branch = dev_tax_service
 ```
 
-Các field branch khác để `main`.
+Leave other branch fields as `main`.
 
-Workflow sẽ:
+The workflow will:
 
-- Resolve commit SHA cuối của `dev_tax_service`.
-- Deploy `tax` bằng image tag SHA đó.
-- Deploy các service còn lại bằng tag `latest`.
-- Deploy vào namespace `yas-developer`.
-- Với `developer_profile=lean`, deploy bản tiết kiệm RAM để tránh pod `Pending` do thiếu memory.
-- In URL test và hosts entries trong summary.
+- Resolve the latest commit SHA of `dev_tax_service`.
+- Deploy `tax` using that SHA image tag.
+- Deploy all other services using the `latest` tag.
+- Deploy to the `yas-developer` namespace.
+- With `developer_profile=lean`, deploy a RAM-efficient version to avoid `Pending` pods due to insufficient memory.
+- Print test URL and hosts entries in the summary.
 
-### Nếu CD fail ở rollout do thiếu memory
+### If CD Fails at Rollout Due to Insufficient Memory
 
-Triệu chứng:
+Symptoms:
 
 ```text
 Waiting for deployment "backoffice-bff" rollout to finish: 0 of 1 updated replicas are available...
@@ -350,39 +350,39 @@ deployment "..." exceeded its progress deadline
 node.kubernetes.io/memory-pressure:NoSchedule
 ```
 
-Nguyên nhân thường gặp trong cluster lab:
+Common causes in a lab cluster:
 
-- Cluster chỉ có 2 node `s-4vcpu-8gb`.
-- Trên cluster đã chạy sẵn `yas`, ArgoCD, Kafka, Elasticsearch, Keycloak, Redis, Postgres, observability, Istio.
-- CD developer deploy thêm một bản YAS thứ hai trong `yas-developer`.
-- Nếu bật Istio sidecar, mỗi app pod thành `2/2`, tốn thêm RAM.
+- Cluster has only 2 nodes `s-4vcpu-8gb`.
+- Cluster is already running `yas`, ArgoCD, Kafka, Elasticsearch, Keycloak, Redis, Postgres, observability, Istio.
+- CD developer deploys a second YAS instance in `yas-developer`.
+- If Istio sidecar is enabled, each app pod becomes `2/2`, consuming more RAM.
 
-Cách xử lý:
+How to handle:
 
-1. Chạy cleanup trước:
+1. Run cleanup first:
 
 ```text
 action = cleanup
 ```
 
-2. Chạy lại deploy với:
+2. Re-run deploy with:
 
 ```text
 action = deploy
 developer_profile = lean
 ```
 
-3. Nếu vẫn thiếu RAM, cần giảm scope deploy hoặc tăng node/RAM cho cluster.
+3. If still insufficient RAM, reduce the deployment scope or increase cluster nodes/RAM.
 
-## 6. Hosts file để test Developer environment
+## 6. Hosts File for Testing Developer Environment
 
-Sau khi workflow chạy xong, xem phần summary để lấy IP Load Balancer. Với cluster hiện tại, IP đang là:
+After the workflow finishes, check the summary section for the Load Balancer IP. For the current cluster, the IP is:
 
 ```text
 129.212.208.194
 ```
 
-Thêm vào file hosts trên máy test:
+Add to the hosts file on your test machine:
 
 ```text
 129.212.208.194 developer.yas.local.com
@@ -390,7 +390,7 @@ Thêm vào file hosts trên máy test:
 129.212.208.194 api-developer.yas.local.com
 ```
 
-Truy cập:
+Access:
 
 ```text
 http://developer.yas.local.com
@@ -398,9 +398,9 @@ http://backoffice-developer.yas.local.com
 http://api-developer.yas.local.com/swagger-ui/index.html
 ```
 
-## 7. Cách kiểm tra CD developer đã hoàn thành
+## 7. How to Verify CD Developer is Complete
 
-Chạy bằng local kubeconfig hoặc hỏi người có quyền cluster chạy:
+Run using a local kubeconfig or ask someone with cluster access to run:
 
 ```bash
 kubectl get pods -n yas-developer
@@ -408,56 +408,56 @@ kubectl get deploy -n yas-developer -o wide
 kubectl get ingress -n yas-developer
 ```
 
-Kết quả mong muốn:
+Expected results:
 
-- Pod trong `yas-developer` là `Running`.
-- Nếu Istio injection bật, pod app sẽ là `2/2`.
-- Service được chọn branch riêng dùng image tag commit SHA.
-- Service còn lại dùng tag `latest`.
-- Ingress có host `developer.yas.local.com`, `backoffice-developer.yas.local.com`, `api-developer.yas.local.com`.
+- Pods in `yas-developer` are `Running`.
+- If Istio injection is enabled, app pods will be `2/2`.
+- Services with a specific branch use the commit SHA image tag.
+- Remaining services use the `latest` tag.
+- Ingress has hosts `developer.yas.local.com`, `backoffice-developer.yas.local.com`, `api-developer.yas.local.com`.
 
-Kiểm tra image tag cụ thể:
+Check specific image tag:
 
 ```bash
 kubectl get deploy tax -n yas-developer -o jsonpath="{.spec.template.spec.containers[0].image}"
 ```
 
-Nếu `tax_branch=dev_tax_service`, output phải có commit SHA của branch đó:
+If `tax_branch=dev_tax_service`, output must contain the commit SHA of that branch:
 
 ```text
 <DOCKERHUB_USERNAME>/yas-tax:<commit_sha>
 ```
 
-## 8. Cách test cleanup
+## 8. How to Test Cleanup
 
-Trên GitHub:
+On GitHub:
 
-1. Vào `Actions`.
-2. Chọn `CD - Developer Build`.
-3. Bấm `Run workflow`.
-4. Chọn:
+1. Go to `Actions`.
+2. Select `CD - Developer Build`.
+3. Click `Run workflow`.
+4. Select:
 
 ```text
 action = cleanup
 ```
 
-Sau khi workflow xong, kiểm tra:
+After the workflow finishes, verify:
 
 ```bash
 kubectl get ns yas-developer
 ```
 
-Nếu cleanup thành công, namespace không còn tồn tại.
+If cleanup is successful, the namespace no longer exists.
 
-## 9. Cách kiểm tra Service Mesh
+## 9. How to Check Service Mesh
 
-Kiểm tra Istio system:
+Check Istio system:
 
 ```bash
 kubectl get pods -n istio-system
 ```
 
-Kết quả mong muốn:
+Expected results:
 
 ```text
 istiod                       Running
@@ -465,15 +465,15 @@ istio-ingressgateway         Running
 istio-egressgateway          Running
 ```
 
-Kiểm tra sidecar:
+Check sidecars:
 
 ```bash
 kubectl get pods -n yas
 ```
 
-Kết quả mong muốn: các app pod trong `yas` là `2/2`.
+Expected results: app pods in `yas` are `2/2`.
 
-Kiểm tra policy:
+Check policies:
 
 ```bash
 kubectl get peerauthentication -A
@@ -481,13 +481,13 @@ kubectl get destinationrule -n yas
 kubectl get virtualservice -n yas
 ```
 
-Kết quả mong muốn:
+Expected results:
 
 - `default-strict-mtls` mode `STRICT`.
-- DestinationRule có host service nội bộ và dùng `ISTIO_MUTUAL`.
-- VirtualService có `tax-retry` và `order-retry`.
+- DestinationRule has internal service host and uses `ISTIO_MUTUAL`.
+- VirtualService has `tax-retry` and `order-retry`.
 
-Kiểm tra public endpoint sau khi bật mesh:
+Check public endpoints after mesh is enabled:
 
 ```powershell
 Invoke-WebRequest -Uri http://storefront.yas.local.com -UseBasicParsing -TimeoutSec 15
@@ -495,32 +495,32 @@ Invoke-WebRequest -Uri http://backoffice.yas.local.com -UseBasicParsing -Timeout
 Invoke-WebRequest -Uri http://api.yas.local.com/swagger-ui/index.html -UseBasicParsing -TimeoutSec 15
 ```
 
-Kết quả mong muốn:
+Expected results:
 
 ```text
 StatusCode: 200
 ```
 
-Kiểm tra proxy sync:
+Check proxy sync:
 
 ```bash
 istioctl proxy-status
 ```
 
-Kết quả mong muốn: các proxy trong `yas` và `ingress-nginx` sync với `istiod`.
+Expected results: proxies in `yas` and `ingress-nginx` are synced with `istiod`.
 
-## 10. Những ảnh/log nên đưa vào báo cáo
+## 10. Screenshots/Logs to Include in Report
 
-Chụp các phần sau:
+Capture the following:
 
-- GitHub Actions workflow `CI - Build Docker Hub Images` pass.
-- Docker Hub có image tag commit SHA.
-- GitHub Actions workflow `CD - Developer Build` pass.
-- Summary của CD có URL và hosts entries.
+- GitHub Actions workflow `CI - Build Docker Hub Images` passing.
+- Docker Hub showing the commit SHA image tag.
+- GitHub Actions workflow `CD - Developer Build` passing.
+- CD summary showing URLs and hosts entries.
 - `kubectl get pods -n yas-developer`.
 - `kubectl get deploy -n yas-developer -o wide`.
-- `kubectl get pods -n yas` hiển thị `2/2`.
+- `kubectl get pods -n yas` showing `2/2`.
 - `kubectl get peerauthentication -A`.
 - `kubectl get destinationrule -n yas`.
 - `kubectl get virtualservice -n yas`.
-- Website `developer.yas.local.com` truy cập được.
+- Website `developer.yas.local.com` accessible.
