@@ -8,7 +8,7 @@ product:
     resources:
       requests:
         cpu: 10m
-        memory: 128Mi
+        memory: 64Mi
       limits:
         cpu: 500m
         memory: 384Mi
@@ -23,7 +23,7 @@ cart:
     resources:
       requests:
         cpu: 10m
-        memory: 128Mi
+        memory: 64Mi
       limits:
         cpu: 500m
         memory: 384Mi
@@ -38,7 +38,7 @@ order:
     resources:
       requests:
         cpu: 10m
-        memory: 128Mi
+        memory: 64Mi
       limits:
         cpu: 500m
         memory: 384Mi
@@ -53,7 +53,7 @@ customer:
     resources:
       requests:
         cpu: 10m
-        memory: 128Mi
+        memory: 64Mi
       limits:
         cpu: 500m
         memory: 384Mi
@@ -68,7 +68,7 @@ inventory:
     resources:
       requests:
         cpu: 10m
-        memory: 128Mi
+        memory: 64Mi
       limits:
         cpu: 500m
         memory: 384Mi
@@ -83,7 +83,7 @@ tax:
     resources:
       requests:
         cpu: 10m
-        memory: 128Mi
+        memory: 64Mi
       limits:
         cpu: 500m
         memory: 384Mi
@@ -98,7 +98,7 @@ media:
     resources:
       requests:
         cpu: 10m
-        memory: 128Mi
+        memory: 64Mi
       limits:
         cpu: 500m
         memory: 384Mi
@@ -113,7 +113,7 @@ search:
     resources:
       requests:
         cpu: 10m
-        memory: 128Mi
+        memory: 64Mi
       limits:
         cpu: 500m
         memory: 384Mi
@@ -128,7 +128,7 @@ sampledata:
     resources:
       requests:
         cpu: 10m
-        memory: 128Mi
+        memory: 64Mi
       limits:
         cpu: 500m
         memory: 384Mi
@@ -170,7 +170,7 @@ storefront-bff:
     resources:
       requests:
         cpu: 10m
-        memory: 128Mi
+        memory: 64Mi
       limits:
         cpu: 500m
         memory: 384Mi
@@ -193,7 +193,7 @@ backoffice-bff:
     resources:
       requests:
         cpu: 10m
-        memory: 128Mi
+        memory: 64Mi
       limits:
         cpu: 500m
         memory: 384Mi
