@@ -143,10 +143,10 @@ storefront-ui:
     resources:
       requests:
         cpu: 5m
-        memory: 32Mi
+        memory: 64Mi
       limits:
         cpu: 100m
-        memory: 96Mi
+        memory: 256Mi
     extraEnvs:
       - name: API_BASE_PATH
         value: "http://storefront.staging.yas.local.com/api"
@@ -158,10 +158,10 @@ backoffice-ui:
     resources:
       requests:
         cpu: 5m
-        memory: 32Mi
+        memory: 64Mi
       limits:
         cpu: 100m
-        memory: 96Mi
+        memory: 256Mi
 storefront-bff:
   backend:
     image:
