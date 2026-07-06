@@ -107,7 +107,7 @@ jobs:
       - name: Deploy selected branch images
         shell: bash
         env:
-          DOCR_REGISTRY: registry.digitalocean.com/academic-registry
+          GHCR_REGISTRY: ghcr.io/23122004
           BASE_DOMAIN: ${{ vars.BASE_DOMAIN }}
           DEVELOPER_PROFILE: ${{ inputs.developer_profile }}
           PRODUCT_BRANCH: ${{ inputs.product_branch }}
@@ -201,7 +201,7 @@ jobs:
             helm upgrade --install "$release" "./k8s/charts/${release}" \
               --namespace "$NAMESPACE" \
               --create-namespace \
-              --set "backend.image.repository=${DOCR_REGISTRY}/${image}" \
+              --set "backend.image.repository=${GHCR_REGISTRY}/${image}" \
               --set "backend.image.tag=${tag}" \
               "${backend_common_args[@]}" \
               "$@"
@@ -216,7 +216,7 @@ jobs:
             helm upgrade --install "$release" "./k8s/charts/${release}" \
               --namespace "$NAMESPACE" \
               --create-namespace \
-              --set "ui.image.repository=${DOCR_REGISTRY}/${image}" \
+              --set "ui.image.repository=${GHCR_REGISTRY}/${image}" \
               --set "ui.image.tag=${tag}" \
               "${ui_common_args[@]}" \
               "$@"
@@ -227,7 +227,7 @@ jobs:
             helm upgrade --install swagger-ui ./k8s/charts/swagger-ui \
               --namespace "$NAMESPACE" \
               --create-namespace \
-              --set "image.repository=${DOCR_REGISTRY}/yas-swagger-ui" \
+              --set "image.repository=${GHCR_REGISTRY}/yas-swagger-ui" \
               --set "image.tag=${tag}" \
               --set "ingress.host=${API_HOST}" \
               --set "ingress.hosts[0].host=${API_HOST}" \

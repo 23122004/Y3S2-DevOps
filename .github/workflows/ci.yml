@@ -1,4 +1,4 @@
-name: CI - Build Docker Hub Images
+name: CI - Build & Push Images
 
 on:
   push:
@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  packages: write
 
 jobs:
   build-and-push:
@@ -95,19 +96,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
         with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-
-      - name: Log in to DOCR
-        run: doctl registry login --expiry-seconds 1200
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare image tags
         id: tags
         shell: bash
         run: |
-          image="registry.digitalocean.com/academic-registry/${{ matrix.image }}"
+          image="ghcr.io/23122004/${{ matrix.image }}"
           tags="${image}:${{ github.sha }}"
           safe_branch="$(echo "${{ github.ref_name }}" | tr '/_' '--' | tr -cd '[:alnum:].-')"
           tags="${tags},${image}:${safe_branch}"
