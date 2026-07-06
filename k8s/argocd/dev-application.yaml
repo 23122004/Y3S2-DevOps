@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: 'https://github.com/23122004/Y3S2-DevOps.git'
-    targetRevision: feat/pipeline-cd
+    targetRevision: main
     path: k8s/charts/yas-umbrella
     helm:
       valueFiles:

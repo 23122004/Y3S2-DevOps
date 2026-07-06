@@ -95,17 +95,19 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Log in to DOCR
+        run: doctl registry login --expiry-seconds 1200
 
       - name: Prepare image tags
         id: tags
         shell: bash
         run: |
-          image="${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}"
+          image="registry.digitalocean.com/academic-registry/${{ matrix.image }}"
           tags="${image}:${{ github.sha }},${image}:main"
           echo "tags=${tags}" >> "$GITHUB_OUTPUT"
 
@@ -129,7 +131,6 @@ jobs:
       - name: Update tags in values.yaml
         shell: bash
         run: |
-          sed -i "s|DOCKERHUB_USERNAME|${{ secrets.DOCKERHUB_USERNAME }}|g" k8s/environments/dev/values.yaml
           
           yq -i '.product.backend.image.tag = "${{ github.sha }}"' k8s/environments/dev/values.yaml
           yq -i '.cart.backend.image.tag = "${{ github.sha }}"' k8s/environments/dev/values.yaml

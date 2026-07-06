@@ -4,7 +4,7 @@ global:
 product:
   backend:
     image:
-      repository: DOCKERHUB_USERNAME/yas-product
+      repository: registry.digitalocean.com/academic-registry/yas-product
       tag: main
     resources:
       requests:
@@ -20,7 +20,7 @@ product:
 cart:
   backend:
     image:
-      repository: DOCKERHUB_USERNAME/yas-cart
+      repository: registry.digitalocean.com/academic-registry/yas-cart
       tag: main
     resources:
       requests:
@@ -36,7 +36,7 @@ cart:
 order:
   backend:
     image:
-      repository: DOCKERHUB_USERNAME/yas-order
+      repository: registry.digitalocean.com/academic-registry/yas-order
       tag: main
     resources:
       requests:
@@ -52,7 +52,7 @@ order:
 customer:
   backend:
     image:
-      repository: DOCKERHUB_USERNAME/yas-customer
+      repository: registry.digitalocean.com/academic-registry/yas-customer
       tag: main
     resources:
       requests:
@@ -68,7 +68,7 @@ customer:
 inventory:
   backend:
     image:
-      repository: DOCKERHUB_USERNAME/yas-inventory
+      repository: registry.digitalocean.com/academic-registry/yas-inventory
       tag: main
     resources:
       requests:
@@ -84,7 +84,7 @@ inventory:
 tax:
   backend:
     image:
-      repository: DOCKERHUB_USERNAME/yas-tax
+      repository: registry.digitalocean.com/academic-registry/yas-tax
       tag: main
     resources:
       requests:
@@ -100,7 +100,7 @@ tax:
 media:
   backend:
     image:
-      repository: DOCKERHUB_USERNAME/yas-media
+      repository: registry.digitalocean.com/academic-registry/yas-media
       tag: main
     resources:
       requests:
@@ -116,7 +116,7 @@ media:
 search:
   backend:
     image:
-      repository: DOCKERHUB_USERNAME/yas-search
+      repository: registry.digitalocean.com/academic-registry/yas-search
       tag: main
     resources:
       requests:
@@ -132,7 +132,7 @@ search:
 sampledata:
   backend:
     image:
-      repository: DOCKERHUB_USERNAME/yas-sampledata
+      repository: registry.digitalocean.com/academic-registry/yas-sampledata
       tag: main
     resources:
       requests:
@@ -148,7 +148,7 @@ sampledata:
 storefront-ui:
   ui:
     image:
-      repository: DOCKERHUB_USERNAME/yas-storefront-ui
+      repository: registry.digitalocean.com/academic-registry/yas-storefront-ui
       tag: main
     resources:
       requests:
@@ -164,7 +164,7 @@ storefront-ui:
 backoffice-ui:
   ui:
     image:
-      repository: DOCKERHUB_USERNAME/yas-backoffice-ui
+      repository: registry.digitalocean.com/academic-registry/yas-backoffice-ui
       tag: main
     resources:
       requests:
@@ -177,7 +177,7 @@ backoffice-ui:
 storefront-bff:
   backend:
     image:
-      repository: DOCKERHUB_USERNAME/yas-storefront-bff
+      repository: registry.digitalocean.com/academic-registry/yas-storefront-bff
       tag: main
     resources:
       requests:
@@ -201,7 +201,7 @@ storefront-bff:
 backoffice-bff:
   backend:
     image:
-      repository: DOCKERHUB_USERNAME/yas-backoffice-bff
+      repository: registry.digitalocean.com/academic-registry/yas-backoffice-bff
       tag: main
     resources:
       requests:
@@ -224,7 +224,7 @@ backoffice-bff:
 
 swagger-ui:
   image:
-    repository: DOCKERHUB_USERNAME/yas-swagger-ui
+    repository: registry.digitalocean.com/academic-registry/yas-swagger-ui
     tag: main
   resources:
     requests:
