@@ -215,10 +215,10 @@ swagger-ui:
   resources:
     requests:
       cpu: 5m
-      memory: 16Mi
+      memory: 64Mi
     limits:
       cpu: 50m
-      memory: 64Mi
+      memory: 256Mi
   ingress:
     enabled: true
     host: api.staging.yas.local.com
