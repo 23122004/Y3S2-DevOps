@@ -148,23 +148,6 @@ kubectl exec -n <namespace> <pod> -- curl -v http://<service>.<namespace>:<port>
 
 ---
 
-## Submission Requirements
-
-### Team Composition
-- Groups of 4 students
-
-### Report Format
-- Include screenshots of all configuration steps
-- File naming convention: `<MSSV1>_<MSSV2>_<MSSV3>.docx`
-- Sort MSSV in ascending order
-
-### Examples:
-- 3 students (23120000, 23120001, 23120002): `23120000_23120001_23120002.docx`
-- 2 students: `23120000_23120001.docx`
-- 1 student: `23120000.docx`
-
----
-
 ## CI/CD Architecture Overview
 
 ```

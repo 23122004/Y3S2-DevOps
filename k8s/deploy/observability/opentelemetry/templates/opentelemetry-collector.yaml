@@ -4,5 +4,12 @@ metadata:
   name: opentelemetry
 spec:
   mode: deployment
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
   config: |
     {{ toYaml .Values.opentelemetryCollectorConfig | nindent 4 }}

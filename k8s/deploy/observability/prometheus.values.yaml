@@ -2,18 +2,55 @@ hostname: &hostname grafana.yas.local.com
 prometheus:
   prometheusSpec:
     enableRemoteWriteReceiver: true
+    resources:
+      requests:
+        cpu: 50m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    nodeSelector:
+      kubernetes.io/hostname: devops-project02-large-3cvc0g
     tolerations:
       - key: "node.kubernetes.io/memory-pressure"
         operator: "Exists"
         effect: "NoSchedule"
 alertmanager:
   alertmanagerSpec:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+    nodeSelector:
+      kubernetes.io/hostname: devops-project02-large-3cvc0g
     tolerations:
       - key: "node.kubernetes.io/memory-pressure"
         operator: "Exists"
         effect: "NoSchedule"
 grafana:
   assertNoLeakedSecrets: false
+  livenessProbe:
+    initialDelaySeconds: 120
+    periodSeconds: 10
+    timeoutSeconds: 10
+    failureThreshold: 30
+  readinessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 10
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  nodeSelector:
+    kubernetes.io/hostname: devops-project02-large-3cvc0g
   tolerations:
     - key: "node.kubernetes.io/memory-pressure"
       operator: "Exists"
@@ -28,12 +65,50 @@ grafana:
       ssl_mode: require
   adminUser: admin
   adminPassword: admin
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      access: proxy
+      url: http://loki-gateway.observability.svc.cluster.local
+      jsonData:
+        derivedFields:
+          - datasourceUid: tempo
+            matcherRegex: "traceID=(\\w+)"
+            name: TraceID
+            url: "$${__value.raw}"
+    - name: Tempo
+      type: tempo
+      access: proxy
+      uid: tempo
+      url: http://tempo.observability.svc.cluster.local:3200
+      jsonData:
+        tracesToLogs:
+          datasourceUid: loki
+          filterByTraceID: true
+        serviceMap:
+          datasourceUid: prometheus
+        nodeGraph:
+          enabled: true
   ingress:
     ingressClassName: nginx
     enabled: true
     hosts:
       - *hostname
+  grafana:
+    ini:
+      database:
+        user: yasadminuser
+        password: admin
 prometheusOperator:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  nodeSelector:
+    kubernetes.io/hostname: devops-project02-large-3cvc0g
   tolerations:
     - key: "node.kubernetes.io/memory-pressure"
       operator: "Exists"

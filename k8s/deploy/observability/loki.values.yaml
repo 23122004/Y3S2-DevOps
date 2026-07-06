@@ -1,9 +1,46 @@
 write:
   replicas: 1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  nodeSelector:
+    kubernetes.io/hostname: devops-project02-large-3cvc0g
 read:
   replicas: 1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  nodeSelector:
+    kubernetes.io/hostname: devops-project02-large-3cvc0g
 backend:
   replicas: 1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  nodeSelector:
+    kubernetes.io/hostname: devops-project02-large-3cvc0g
+gateway:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 50m
+      memory: 64Mi
+  nodeSelector:
+    kubernetes.io/hostname: devops-project02-large-3cvc0g
 loki:
   commonConfig:
     replication_factor: 1
