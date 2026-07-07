@@ -10,7 +10,7 @@ product:
         cpu: 1m
         memory: 64Mi
       limits:
-        cpu: 1m
+        #         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -25,7 +25,7 @@ cart:
         cpu: 1m
         memory: 64Mi
       limits:
-        cpu: 1m
+        #         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -40,7 +40,7 @@ order:
         cpu: 1m
         memory: 64Mi
       limits:
-        cpu: 1m
+        #         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -55,7 +55,7 @@ customer:
         cpu: 1m
         memory: 64Mi
       limits:
-        cpu: 1m
+        #         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -70,7 +70,7 @@ inventory:
         cpu: 1m
         memory: 64Mi
       limits:
-        cpu: 1m
+        #         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -85,7 +85,7 @@ tax:
         cpu: 1m
         memory: 64Mi
       limits:
-        cpu: 1m
+        #         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -100,7 +100,7 @@ media:
         cpu: 1m
         memory: 64Mi
       limits:
-        cpu: 1m
+        #         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -115,7 +115,7 @@ search:
         cpu: 1m
         memory: 64Mi
       limits:
-        cpu: 1m
+        #         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -130,7 +130,7 @@ sampledata:
         cpu: 1m
         memory: 64Mi
       limits:
-        cpu: 1m
+        #         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -145,7 +145,7 @@ storefront-ui:
         cpu: 1m
         memory: 64Mi
       limits:
-        cpu: 1m
+        #         cpu: 100m
         memory: 256Mi
     extraEnvs:
       - name: API_BASE_PATH
@@ -160,7 +160,7 @@ backoffice-ui:
         cpu: 1m
         memory: 64Mi
       limits:
-        cpu: 1m
+        #         cpu: 100m
         memory: 256Mi
 storefront-bff:
   backend:
@@ -172,7 +172,7 @@ storefront-bff:
         cpu: 1m
         memory: 64Mi
       limits:
-        cpu: 1m
+        #         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: SPRING_PROFILES_ACTIVE
@@ -195,7 +195,7 @@ backoffice-bff:
         cpu: 1m
         memory: 64Mi
       limits:
-        cpu: 1m
+        #         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: SPRING_PROFILES_ACTIVE
@@ -217,8 +217,8 @@ swagger-ui:
       cpu: 1m
       memory: 64Mi
     limits:
-      cpu: 1m
-      memory: 256Mi
+        #         cpu: 100m
+        memory: 256Mi
   ingress:
     enabled: true
     host: api.dev.yas.local.com
@@ -228,3 +228,5 @@ swagger-ui:
           - path: /swagger-ui
             pathType: ImplementationSpecific
   urls: "[{ url: 'http://api.dev.yas.local.com/product/v3/api-docs', name: 'Product' }, { url: 'http://api.dev.yas.local.com/media/v3/api-docs', name: 'Media' }, { url: 'http://api.dev.yas.local.com/customer/v3/api-docs', name: 'Customer' }, { url: 'http://api.dev.yas.local.com/cart/v3/api-docs', name: 'Cart'}, { url: 'http://api.dev.yas.local.com/order/v3/api-docs', name: 'Order'}, { url: 'http://api.dev.yas.local.com/inventory/v3/api-docs', name: 'Inventory'}, { url: 'http://api.dev.yas.local.com/tax/v3/api-docs', name: 'Tax' }, { url: 'http://api.dev.yas.local.com/search/v3/api-docs', name: 'Search'}]"
+
+
