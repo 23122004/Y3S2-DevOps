@@ -221,13 +221,14 @@ kubectl exec -n <namespace> <pod> -- curl -v http://<service>.<namespace>:<port>
 
 ## Istio Service Mesh Checklist
 
-- [ ] Install Istio on K8S cluster
-- [ ] Enable mTLS (PeerAuthentication)
-- [ ] Configure DestinationRule for mTLS
-- [ ] Create VirtualService for retry policies
-- [ ] Set up AuthorizationPolicy
-- [ ] Install Kiali
-- [ ] Capture topology screenshots
-- [ ] Test retry with 500 errors
-- [ ] Test authorization blocking/allowing
-- [ ] Document all steps in README
+- [x] Install Istio on K8S cluster
+- [x] Enable mTLS (PeerAuthentication)
+- [x] Configure DestinationRule for mTLS
+- [x] Create VirtualService for retry policies
+- [x] Set up AuthorizationPolicy
+- [x] Install Kiali
+- [x] Capture topology screenshots
+- [x] Test retry with 500 errors
+- [x] Test authorization blocking/allowing
+- [x] Document all steps in README
+
