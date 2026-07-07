@@ -45,6 +45,11 @@ loki:
   commonConfig:
     replication_factor: 1
   auth_enabled: false
+  storage:
+    bucketNames:
+      chunks: chunks
+      ruler: ruler
+      admin: admin
 test:
   enabled: false
 storage:
