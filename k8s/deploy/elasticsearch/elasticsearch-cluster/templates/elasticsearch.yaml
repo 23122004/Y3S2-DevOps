@@ -19,6 +19,9 @@ spec:
         xpack.security.http.ssl.enabled: false
       podTemplate:
         spec:
+          volumes:
+            - name: elasticsearch-data
+              emptyDir: {}
           tolerations:
             - key: "node.kubernetes.io/memory-pressure"
               operator: "Exists"
