@@ -217,8 +217,8 @@ swagger-ui:
       cpu: 1m
       memory: 64Mi
     limits:
-        #         cpu: 100m
-        memory: 256Mi
+      #       cpu: 50m
+      memory: 256Mi
   ingress:
     enabled: true
     host: api.dev.yas.local.com
