@@ -29,7 +29,7 @@ pgadmin:
   user: admin@yas.com
   password: admin
 persistence:
-  enabled: true
+  enabled: false
   accessMode: ReadWriteOnce
   size: 2Gi
 service:

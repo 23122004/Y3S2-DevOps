@@ -51,6 +51,8 @@ storage:
   type: 'filesystem'
 minio:
   enabled: true
+  persistence:
+    enabled: false
 
 monitoring:
   selfMonitoring:

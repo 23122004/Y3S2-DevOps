@@ -2,6 +2,9 @@ hostname: &hostname grafana.yas.local.com
 prometheus:
   prometheusSpec:
     enableRemoteWriteReceiver: true
+    storageSpec:
+      emptyDir:
+        medium: ""
     resources:
       requests:
         memory: 256Mi
@@ -17,6 +20,9 @@ prometheus:
         effect: "NoSchedule"
 alertmanager:
   alertmanagerSpec:
+    storageSpec:
+      emptyDir:
+        medium: ""
     resources:
       requests:
         memory: 64Mi
