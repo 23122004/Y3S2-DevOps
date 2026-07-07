@@ -2,10 +2,10 @@ write:
   replicas: 1
   resources:
     requests:
-      cpu: 10m
+#       cpu: 10m
       memory: 64Mi
     limits:
-      cpu: 100m
+#       cpu: 100m
       memory: 128Mi
   nodeSelector:
     doks.digitalocean.com/node-pool: devops-project02-mem-opt
@@ -13,10 +13,10 @@ read:
   replicas: 1
   resources:
     requests:
-      cpu: 10m
+#       cpu: 10m
       memory: 64Mi
     limits:
-      cpu: 100m
+#       cpu: 100m
       memory: 128Mi
   nodeSelector:
     doks.digitalocean.com/node-pool: devops-project02-mem-opt
@@ -24,20 +24,20 @@ backend:
   replicas: 1
   resources:
     requests:
-      cpu: 10m
+#       cpu: 10m
       memory: 64Mi
     limits:
-      cpu: 100m
+#       cpu: 100m
       memory: 128Mi
   nodeSelector:
     doks.digitalocean.com/node-pool: devops-project02-mem-opt
 gateway:
   resources:
     requests:
-      cpu: 10m
+#       cpu: 10m
       memory: 32Mi
     limits:
-      cpu: 50m
+#       cpu: 50m
       memory: 64Mi
   nodeSelector:
     doks.digitalocean.com/node-pool: devops-project02-mem-opt

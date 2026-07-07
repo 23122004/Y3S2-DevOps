@@ -7,10 +7,10 @@ product:
       tag: dde2dd18ee6391d3f2a96d109d87c8051a17cbe9
     resources:
       requests:
-        cpu: 10m
+#         cpu: 10m
         memory: 64Mi
       limits:
-        cpu: 500m
+#         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -22,10 +22,10 @@ cart:
       tag: dde2dd18ee6391d3f2a96d109d87c8051a17cbe9
     resources:
       requests:
-        cpu: 10m
+#         cpu: 10m
         memory: 64Mi
       limits:
-        cpu: 500m
+#         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -37,10 +37,10 @@ order:
       tag: dde2dd18ee6391d3f2a96d109d87c8051a17cbe9
     resources:
       requests:
-        cpu: 10m
+#         cpu: 10m
         memory: 64Mi
       limits:
-        cpu: 500m
+#         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -52,10 +52,10 @@ customer:
       tag: dde2dd18ee6391d3f2a96d109d87c8051a17cbe9
     resources:
       requests:
-        cpu: 10m
+#         cpu: 10m
         memory: 64Mi
       limits:
-        cpu: 500m
+#         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -67,10 +67,10 @@ inventory:
       tag: dde2dd18ee6391d3f2a96d109d87c8051a17cbe9
     resources:
       requests:
-        cpu: 10m
+#         cpu: 10m
         memory: 64Mi
       limits:
-        cpu: 500m
+#         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -82,10 +82,10 @@ tax:
       tag: dde2dd18ee6391d3f2a96d109d87c8051a17cbe9
     resources:
       requests:
-        cpu: 10m
+#         cpu: 10m
         memory: 64Mi
       limits:
-        cpu: 500m
+#         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -97,10 +97,10 @@ media:
       tag: dde2dd18ee6391d3f2a96d109d87c8051a17cbe9
     resources:
       requests:
-        cpu: 10m
+#         cpu: 10m
         memory: 64Mi
       limits:
-        cpu: 500m
+#         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -112,10 +112,10 @@ search:
       tag: dde2dd18ee6391d3f2a96d109d87c8051a17cbe9
     resources:
       requests:
-        cpu: 10m
+#         cpu: 10m
         memory: 64Mi
       limits:
-        cpu: 500m
+#         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -127,10 +127,10 @@ sampledata:
       tag: dde2dd18ee6391d3f2a96d109d87c8051a17cbe9
     resources:
       requests:
-        cpu: 10m
+#         cpu: 10m
         memory: 64Mi
       limits:
-        cpu: 500m
+#         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -142,10 +142,10 @@ storefront-ui:
       tag: dde2dd18ee6391d3f2a96d109d87c8051a17cbe9
     resources:
       requests:
-        cpu: 5m
+#         cpu: 5m
         memory: 64Mi
       limits:
-        cpu: 100m
+#         cpu: 100m
         memory: 256Mi
     extraEnvs:
       - name: API_BASE_PATH
@@ -157,10 +157,10 @@ backoffice-ui:
       tag: dde2dd18ee6391d3f2a96d109d87c8051a17cbe9
     resources:
       requests:
-        cpu: 5m
+#         cpu: 5m
         memory: 64Mi
       limits:
-        cpu: 100m
+#         cpu: 100m
         memory: 256Mi
 storefront-bff:
   backend:
@@ -169,10 +169,10 @@ storefront-bff:
       tag: dde2dd18ee6391d3f2a96d109d87c8051a17cbe9
     resources:
       requests:
-        cpu: 10m
+#         cpu: 10m
         memory: 64Mi
       limits:
-        cpu: 500m
+#         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: SPRING_PROFILES_ACTIVE
@@ -192,10 +192,10 @@ backoffice-bff:
       tag: dde2dd18ee6391d3f2a96d109d87c8051a17cbe9
     resources:
       requests:
-        cpu: 10m
+#         cpu: 10m
         memory: 64Mi
       limits:
-        cpu: 500m
+#         cpu: 500m
         memory: 384Mi
     extraEnvs:
       - name: SPRING_PROFILES_ACTIVE
@@ -214,10 +214,10 @@ swagger-ui:
     tag: dde2dd18ee6391d3f2a96d109d87c8051a17cbe9
   resources:
     requests:
-      cpu: 5m
+#       cpu: 5m
       memory: 64Mi
     limits:
-      cpu: 50m
+#       cpu: 50m
       memory: 256Mi
   ingress:
     enabled: true

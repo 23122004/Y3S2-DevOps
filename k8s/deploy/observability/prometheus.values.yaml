@@ -4,11 +4,11 @@ prometheus:
     enableRemoteWriteReceiver: true
     resources:
       requests:
-        cpu: 50m
         memory: 256Mi
+        #         cpu: 50m
       limits:
-        cpu: 500m
         memory: 512Mi
+        #         cpu: 500m
     nodeSelector:
       doks.digitalocean.com/node-pool: devops-project02-mem-opt
     tolerations:
@@ -19,11 +19,11 @@ alertmanager:
   alertmanagerSpec:
     resources:
       requests:
-        cpu: 10m
         memory: 64Mi
+        #         cpu: 10m
       limits:
-        cpu: 100m
         memory: 128Mi
+        #         cpu: 100m
     nodeSelector:
       doks.digitalocean.com/node-pool: devops-project02-mem-opt
     tolerations:
@@ -44,11 +44,11 @@ grafana:
     failureThreshold: 10
   resources:
     requests:
-      cpu: 50m
       memory: 128Mi
+      #       cpu: 50m
     limits:
-      cpu: 500m
       memory: 256Mi
+      #       cpu: 500m
   nodeSelector:
     doks.digitalocean.com/node-pool: devops-project02-mem-opt
   tolerations:
@@ -102,11 +102,11 @@ grafana:
 prometheusOperator:
   resources:
     requests:
-      cpu: 10m
       memory: 64Mi
+      #       cpu: 10m
     limits:
-      cpu: 100m
       memory: 128Mi
+      #       cpu: 100m
   nodeSelector:
     doks.digitalocean.com/node-pool: devops-project02-mem-opt
   tolerations:
@@ -128,11 +128,11 @@ prometheusOperator:
 kube-state-metrics:
   resources:
     requests:
-      cpu: 50m
       memory: 128Mi
+      #       cpu: 50m
     limits:
-      cpu: 150m
       memory: 256Mi
+      #       cpu: 150m
   livenessProbe:
     initialDelaySeconds: 30
     timeoutSeconds: 5

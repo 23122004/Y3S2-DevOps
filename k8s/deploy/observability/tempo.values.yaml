@@ -1,10 +1,10 @@
 tempo:
   resources:
     requests:
-      cpu: 10m
+#       cpu: 10m
       memory: 64Mi
     limits:
-      cpu: 100m
+#       cpu: 100m
       memory: 128Mi
   nodeSelector:
     doks.digitalocean.com/node-pool: devops-project02-mem-opt
