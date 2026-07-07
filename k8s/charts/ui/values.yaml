@@ -67,7 +67,7 @@ ingress:
 # and a liveness crashloop (storefront-ui/backoffice-ui). See problem-completion-check.md.
 resources:
   requests:
-    cpu: 25m
+#     cpu: 25m
     memory: 128Mi
   limits:
     cpu: 500m
