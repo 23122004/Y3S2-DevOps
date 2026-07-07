@@ -9,6 +9,8 @@ write:
       memory: 128Mi
   nodeSelector:
     doks.digitalocean.com/node-pool: devops-project02-mem-opt
+  persistence:
+    enabled: false
 read:
   replicas: 1
   resources:
@@ -31,6 +33,8 @@ backend:
       memory: 128Mi
   nodeSelector:
     doks.digitalocean.com/node-pool: devops-project02-mem-opt
+  persistence:
+    enabled: false
 gateway:
   resources:
     requests:
