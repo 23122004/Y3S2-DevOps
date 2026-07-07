@@ -3,6 +3,7 @@ kind: OpenTelemetryCollector
 metadata:
   name: opentelemetry
 spec:
+  image: otel/opentelemetry-collector-contrib:0.105.0
   mode: deployment
   resources:
     requests:

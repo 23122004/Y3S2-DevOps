@@ -11,7 +11,7 @@ product:
         memory: 128Mi
       limits:
         cpu: 500m
-        memory: 384Mi
+        memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
         value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
@@ -26,7 +26,7 @@ cart:
         memory: 128Mi
       limits:
         cpu: 500m
-        memory: 384Mi
+        memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
         value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
@@ -41,7 +41,7 @@ order:
         memory: 128Mi
       limits:
         cpu: 500m
-        memory: 384Mi
+        memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
         value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
@@ -56,7 +56,7 @@ customer:
         memory: 128Mi
       limits:
         cpu: 500m
-        memory: 384Mi
+        memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
         value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
@@ -71,7 +71,7 @@ inventory:
         memory: 128Mi
       limits:
         cpu: 500m
-        memory: 384Mi
+        memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
         value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
@@ -86,7 +86,7 @@ tax:
         memory: 128Mi
       limits:
         cpu: 500m
-        memory: 384Mi
+        memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
         value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
@@ -101,7 +101,7 @@ media:
         memory: 128Mi
       limits:
         cpu: 500m
-        memory: 384Mi
+        memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
         value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
@@ -116,7 +116,7 @@ search:
         memory: 128Mi
       limits:
         cpu: 500m
-        memory: 384Mi
+        memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
         value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
@@ -131,7 +131,7 @@ sampledata:
         memory: 128Mi
       limits:
         cpu: 500m
-        memory: 384Mi
+        memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
         value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
@@ -173,7 +173,7 @@ storefront-bff:
         memory: 128Mi
       limits:
         cpu: 500m
-        memory: 384Mi
+        memory: 512Mi
     extraEnvs:
       - name: SPRING_PROFILES_ACTIVE
         value: prod
@@ -196,7 +196,7 @@ backoffice-bff:
         memory: 128Mi
       limits:
         cpu: 500m
-        memory: 384Mi
+        memory: 512Mi
     extraEnvs:
       - name: SPRING_PROFILES_ACTIVE
         value: prod
