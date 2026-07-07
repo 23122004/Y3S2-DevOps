@@ -66,6 +66,13 @@ spec:
             name: tax
             port:
               number: 80
+      - path: /sampledata
+        pathType: Prefix
+        backend:
+          service:
+            name: sampledata
+            port:
+              number: 80
   - host: nginx-{{ .Release.Namespace }}
     http:
       paths:
@@ -123,5 +130,12 @@ spec:
         backend:
           service:
             name: tax
+            port:
+              number: 80
+      - path: /sampledata
+        pathType: Prefix
+        backend:
+          service:
+            name: sampledata
             port:
               number: 80
