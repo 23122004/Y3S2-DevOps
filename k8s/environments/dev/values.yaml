@@ -149,7 +149,7 @@ storefront-ui:
         memory: 256Mi
     extraEnvs:
       - name: API_BASE_PATH
-        value: "http://storefront.dev.yas.local.com/api"
+        value: "http://storefront-bff/api"
 backoffice-ui:
   ui:
     image:
