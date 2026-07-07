@@ -229,4 +229,12 @@ swagger-ui:
             pathType: ImplementationSpecific
   urls: "[{ url: 'http://api.staging.yas.local.com/product/v3/api-docs', name: 'Product' }, { url: 'http://api.staging.yas.local.com/media/v3/api-docs', name: 'Media' }, { url: 'http://api.staging.yas.local.com/customer/v3/api-docs', name: 'Customer' }, { url: 'http://api.staging.yas.local.com/cart/v3/api-docs', name: 'Cart'}, { url: 'http://api.staging.yas.local.com/order/v3/api-docs', name: 'Order'}, { url: 'http://api.staging.yas.local.com/inventory/v3/api-docs', name: 'Inventory'}, { url: 'http://api.staging.yas.local.com/tax/v3/api-docs', name: 'Tax' }, { url: 'http://api.staging.yas.local.com/search/v3/api-docs', name: 'Search'}]"
 
+yas-configuration:
+  mediaApplicationConfig:
+    server:
+      servlet:
+        context-path: /media
+    yas:
+      publicUrl: http://api.staging.yas.local.com/media
+
 
