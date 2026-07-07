@@ -7,10 +7,10 @@ product:
       tag: 60bc881f5d85840b4b1e4a2d667a2d855a2cb921
     resources:
       requests:
-        #         cpu: 10m
+        cpu: 1m
         memory: 64Mi
       limits:
-        #         cpu: 500m
+        cpu: 1m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -22,10 +22,10 @@ cart:
       tag: 60bc881f5d85840b4b1e4a2d667a2d855a2cb921
     resources:
       requests:
-        #         cpu: 10m
+        cpu: 1m
         memory: 64Mi
       limits:
-        #         cpu: 500m
+        cpu: 1m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -37,10 +37,10 @@ order:
       tag: 60bc881f5d85840b4b1e4a2d667a2d855a2cb921
     resources:
       requests:
-        #         cpu: 10m
+        cpu: 1m
         memory: 64Mi
       limits:
-        #         cpu: 500m
+        cpu: 1m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -52,10 +52,10 @@ customer:
       tag: 60bc881f5d85840b4b1e4a2d667a2d855a2cb921
     resources:
       requests:
-        #         cpu: 10m
+        cpu: 1m
         memory: 64Mi
       limits:
-        #         cpu: 500m
+        cpu: 1m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -67,10 +67,10 @@ inventory:
       tag: 60bc881f5d85840b4b1e4a2d667a2d855a2cb921
     resources:
       requests:
-        #         cpu: 10m
+        cpu: 1m
         memory: 64Mi
       limits:
-        #         cpu: 500m
+        cpu: 1m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -82,10 +82,10 @@ tax:
       tag: 60bc881f5d85840b4b1e4a2d667a2d855a2cb921
     resources:
       requests:
-        #         cpu: 10m
+        cpu: 1m
         memory: 64Mi
       limits:
-        #         cpu: 500m
+        cpu: 1m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -97,10 +97,10 @@ media:
       tag: 60bc881f5d85840b4b1e4a2d667a2d855a2cb921
     resources:
       requests:
-        #         cpu: 10m
+        cpu: 1m
         memory: 64Mi
       limits:
-        #         cpu: 500m
+        cpu: 1m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -112,10 +112,10 @@ search:
       tag: 60bc881f5d85840b4b1e4a2d667a2d855a2cb921
     resources:
       requests:
-        #         cpu: 10m
+        cpu: 1m
         memory: 64Mi
       limits:
-        #         cpu: 500m
+        cpu: 1m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -127,10 +127,10 @@ sampledata:
       tag: 60bc881f5d85840b4b1e4a2d667a2d855a2cb921
     resources:
       requests:
-        #         cpu: 10m
+        cpu: 1m
         memory: 64Mi
       limits:
-        #         cpu: 500m
+        cpu: 1m
         memory: 384Mi
     extraEnvs:
       - name: JAVA_OPTS
@@ -142,10 +142,10 @@ storefront-ui:
       tag: 60bc881f5d85840b4b1e4a2d667a2d855a2cb921
     resources:
       requests:
-        #         cpu: 5m
+        cpu: 1m
         memory: 64Mi
       limits:
-        #         cpu: 100m
+        cpu: 1m
         memory: 256Mi
     extraEnvs:
       - name: API_BASE_PATH
@@ -157,10 +157,10 @@ backoffice-ui:
       tag: 60bc881f5d85840b4b1e4a2d667a2d855a2cb921
     resources:
       requests:
-        #         cpu: 5m
+        cpu: 1m
         memory: 64Mi
       limits:
-        #         cpu: 100m
+        cpu: 1m
         memory: 256Mi
 storefront-bff:
   backend:
@@ -169,10 +169,10 @@ storefront-bff:
       tag: 60bc881f5d85840b4b1e4a2d667a2d855a2cb921
     resources:
       requests:
-        #         cpu: 10m
+        cpu: 1m
         memory: 64Mi
       limits:
-        #         cpu: 500m
+        cpu: 1m
         memory: 384Mi
     extraEnvs:
       - name: SPRING_PROFILES_ACTIVE
@@ -192,10 +192,10 @@ backoffice-bff:
       tag: 60bc881f5d85840b4b1e4a2d667a2d855a2cb921
     resources:
       requests:
-        #         cpu: 10m
+        cpu: 1m
         memory: 64Mi
       limits:
-        #         cpu: 500m
+        cpu: 1m
         memory: 384Mi
     extraEnvs:
       - name: SPRING_PROFILES_ACTIVE
@@ -214,10 +214,10 @@ swagger-ui:
     tag: 60bc881f5d85840b4b1e4a2d667a2d855a2cb921
   resources:
     requests:
-      #       cpu: 5m
+      cpu: 1m
       memory: 64Mi
     limits:
-      #       cpu: 50m
+      cpu: 1m
       memory: 256Mi
   ingress:
     enabled: true
