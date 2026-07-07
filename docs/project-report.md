@@ -40,8 +40,8 @@ Kubernetes Cluster (DOKS, 3 nodes)
 
 ### 2.1 Kubernetes Cluster — ✅
 
-- DigitalOcean Managed Kubernetes, 3 worker nodes `s-4vcpu-8gb`
-- Node pool: `devops-project02-large-*`
+- DigitalOcean Managed Kubernetes, 3 worker nodes `m-2vcpu-16gb` (Memory-Optimized)
+- Node pool: `devops-project02-mem-opt`
 - Load Balancer IP: `129.212.208.194`
 
 ### 2.2 CI Pipeline — ✅

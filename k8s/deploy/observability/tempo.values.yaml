@@ -7,7 +7,7 @@ tempo:
       cpu: 100m
       memory: 128Mi
   nodeSelector:
-    kubernetes.io/hostname: devops-project02-large-3cvc0g
+    doks.digitalocean.com/node-pool: devops-project02-mem-opt
   metricsGenerator:
     enabled: true
     remoteWriteUrl: "http://prometheus-kube-prometheus-prometheus:9090/api/v1/write"

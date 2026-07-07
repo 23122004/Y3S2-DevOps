@@ -24,7 +24,7 @@
 
 ## 1. Kubernetes Cluster — ✅
 
-- DigitalOcean managed K8s, 3 worker nodes `s-4vcpu-8gb`.
+- DigitalOcean managed K8s, 3 worker nodes `m-2vcpu-16gb` (Memory-Optimized).
 - Requirement: "1 master + 1 worker OR minikube OR any model" → managed multi-node satisfies.
 
 ## 2. CI Pipeline per branch — ✅

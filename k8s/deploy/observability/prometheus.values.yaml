@@ -10,7 +10,7 @@ prometheus:
         cpu: 500m
         memory: 512Mi
     nodeSelector:
-      kubernetes.io/hostname: devops-project02-large-3cvc0g
+      doks.digitalocean.com/node-pool: devops-project02-mem-opt
     tolerations:
       - key: "node.kubernetes.io/memory-pressure"
         operator: "Exists"
@@ -25,7 +25,7 @@ alertmanager:
         cpu: 100m
         memory: 128Mi
     nodeSelector:
-      kubernetes.io/hostname: devops-project02-large-3cvc0g
+      doks.digitalocean.com/node-pool: devops-project02-mem-opt
     tolerations:
       - key: "node.kubernetes.io/memory-pressure"
         operator: "Exists"
@@ -50,7 +50,7 @@ grafana:
       cpu: 500m
       memory: 256Mi
   nodeSelector:
-    kubernetes.io/hostname: devops-project02-large-3cvc0g
+    doks.digitalocean.com/node-pool: devops-project02-mem-opt
   tolerations:
     - key: "node.kubernetes.io/memory-pressure"
       operator: "Exists"
@@ -108,7 +108,7 @@ prometheusOperator:
       cpu: 100m
       memory: 128Mi
   nodeSelector:
-    kubernetes.io/hostname: devops-project02-large-3cvc0g
+    doks.digitalocean.com/node-pool: devops-project02-mem-opt
   tolerations:
     - key: "node.kubernetes.io/memory-pressure"
       operator: "Exists"

@@ -8,7 +8,7 @@ write:
       cpu: 100m
       memory: 128Mi
   nodeSelector:
-    kubernetes.io/hostname: devops-project02-large-3cvc0g
+    doks.digitalocean.com/node-pool: devops-project02-mem-opt
 read:
   replicas: 1
   resources:
@@ -19,7 +19,7 @@ read:
       cpu: 100m
       memory: 128Mi
   nodeSelector:
-    kubernetes.io/hostname: devops-project02-large-3cvc0g
+    doks.digitalocean.com/node-pool: devops-project02-mem-opt
 backend:
   replicas: 1
   resources:
@@ -30,7 +30,7 @@ backend:
       cpu: 100m
       memory: 128Mi
   nodeSelector:
-    kubernetes.io/hostname: devops-project02-large-3cvc0g
+    doks.digitalocean.com/node-pool: devops-project02-mem-opt
 gateway:
   resources:
     requests:
@@ -40,7 +40,7 @@ gateway:
       cpu: 50m
       memory: 64Mi
   nodeSelector:
-    kubernetes.io/hostname: devops-project02-large-3cvc0g
+    doks.digitalocean.com/node-pool: devops-project02-mem-opt
 loki:
   commonConfig:
     replication_factor: 1
