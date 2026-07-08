@@ -105,6 +105,30 @@ media:
     extraEnvs:
       - name: JAVA_OPTS
         value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+    extraObjects:
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: media-pvc
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          storageClassName: do-block-storage
+          resources:
+            requests:
+              storage: 2Gi
+    extraVolumes:
+      - name: media-application
+        configMap:
+          name: media-application-configmap
+      - name: media-storage
+        persistentVolumeClaim:
+          claimName: media-pvc
+    extraVolumeMounts:
+      - name: media-application
+        mountPath: /opt/yas/media
+      - name: media-storage
+        mountPath: /images
 search:
   backend:
     image:

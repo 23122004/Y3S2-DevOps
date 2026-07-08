@@ -17,11 +17,18 @@ spec:
       config:
         node.store.allow_mmap: false
         xpack.security.http.ssl.enabled: false
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 2Gi
+            storageClassName: do-block-storage
       podTemplate:
         spec:
-          volumes:
-            - name: elasticsearch-data
-              emptyDir: {}
           tolerations:
             - key: "node.kubernetes.io/memory-pressure"
               operator: "Exists"
