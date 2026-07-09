@@ -147,4 +147,4 @@ jobs:
         with:
           context: ./sampledata
           push: true
-          tags: ghcr.io/nashtech-garage/yas-sampledata:latest
+          tags: ghcr.io/23122004/yas-sampledata:latest

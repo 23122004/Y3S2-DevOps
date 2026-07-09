@@ -133,4 +133,4 @@ jobs:
         with:
           context: ./payment-paypal
           push: true
-          tags: ghcr.io/nashtech-garage/yas-payment-paypal:latest
+          tags: ghcr.io/23122004/yas-payment-paypal:latest

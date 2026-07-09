@@ -133,4 +133,4 @@ jobs:
         with:
           context: ./customer
           push: true
-          tags: ghcr.io/nashtech-garage/yas-customer:latest
+          tags: ghcr.io/23122004/yas-customer:latest

@@ -133,4 +133,4 @@ jobs:
         with:
           context: ./webhook
           push: true
-          tags: ghcr.io/nashtech-garage/yas-webhook:latest
+          tags: ghcr.io/23122004/yas-webhook:latest

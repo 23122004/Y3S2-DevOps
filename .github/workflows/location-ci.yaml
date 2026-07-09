@@ -133,4 +133,4 @@ jobs:
         with:
           context: ./location
           push: true
-          tags: ghcr.io/nashtech-garage/yas-location:latest
+          tags: ghcr.io/23122004/yas-location:latest

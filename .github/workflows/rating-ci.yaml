@@ -133,4 +133,4 @@ jobs:
         with:
           context: ./rating
           push: true
-          tags: ghcr.io/nashtech-garage/yas-rating:latest
+          tags: ghcr.io/23122004/yas-rating:latest
