@@ -110,7 +110,8 @@ helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
 #Install grafana operator
 helm upgrade --install grafana-operator oci://ghcr.io/grafana-operator/helm-charts/grafana-operator \
 --version v5.0.2 \
---create-namespace --namespace observability
+--create-namespace --namespace observability \
+--set resources.requests.cpu=10m,resources.requests.memory=64Mi,resources.limits.cpu=100m,resources.limits.memory=128Mi
 
 #Add datasource and dashboard to grafana
 helm upgrade --install grafana ./observability/grafana \

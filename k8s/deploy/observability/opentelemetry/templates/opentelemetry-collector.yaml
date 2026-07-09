@@ -3,6 +3,14 @@ kind: OpenTelemetryCollector
 metadata:
   name: opentelemetry
 spec:
+  image: otel/opentelemetry-collector-contrib:0.105.0
   mode: deployment
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
   config: |
     {{ toYaml .Values.opentelemetryCollectorConfig | nindent 4 }}

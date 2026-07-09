@@ -14,7 +14,7 @@ metadata:
   namespace: dev
 spec:
   mtls:
-    mode: STRICT
+    mode: PERMISSIVE
 ---
 apiVersion: security.istio.io/v1
 kind: PeerAuthentication
@@ -23,7 +23,7 @@ metadata:
   namespace: staging
 spec:
   mtls:
-    mode: STRICT
+    mode: PERMISSIVE
 ---
 apiVersion: security.istio.io/v1
 kind: PeerAuthentication

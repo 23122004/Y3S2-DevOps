@@ -19,6 +19,10 @@ opentelemetryCollectorConfig:
       endpoint: http://tempo:4318
       tls:
         insecure: true
+    prometheusremotewrite:
+      endpoint: http://prometheus-operated.observability.svc.cluster.local:9090/api/v1/write
+      resource_to_telemetry_conversion:
+        enabled: true
   service:
     pipelines:
       logs:
@@ -29,3 +33,10 @@ opentelemetryCollectorConfig:
         receivers: [otlp]
         processors: [batch]
         exporters: [otlphttp]
+      metrics:
+        receivers: [otlp]
+        processors: [batch]
+        exporters: [prometheusremotewrite]
+    telemetry:
+      metrics:
+        address: 0.0.0.0:8889

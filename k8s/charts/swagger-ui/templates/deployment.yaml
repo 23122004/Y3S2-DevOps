@@ -50,10 +50,14 @@ spec:
             httpGet:
               path: {{ .Values.baseUrl }}
               port: http
+            initialDelaySeconds: 15
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: {{ .Values.baseUrl }}
               port: http
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
