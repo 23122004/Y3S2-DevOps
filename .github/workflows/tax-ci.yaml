@@ -133,4 +133,4 @@ jobs:
         with:
           context: ./tax
           push: true
-          tags: ghcr.io/nashtech-garage/yas-tax:latest
+          tags: ghcr.io/23122004/yas-tax:latest
