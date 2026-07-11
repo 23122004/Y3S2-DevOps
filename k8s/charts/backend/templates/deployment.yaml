@@ -10,6 +10,8 @@ metadata:
       {{- toYaml .Values.deployment.extraAnnotations | nindent 4 }}
     {{- end }}
 spec:
+  strategy:
+    type: Recreate
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
