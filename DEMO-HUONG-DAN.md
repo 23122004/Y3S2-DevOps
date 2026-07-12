@@ -217,14 +217,18 @@ kubectl apply -f k8s/istio/staging-demo/peer-authentication-staging-strict.yaml
 
 ```bash
 # Mục đích: kiểm chứng policy đã áp đúng và app vẫn truy cập được qua ingress (bắt lỗi sớm)
-kubectl get peerauthentication -n staging    # default-strict-mtls = STRICT + 3 entrypoint PERMISSIVE
+kubectl get peerauthentication -n staging    # default-strict-mtls (STRICT) + 12 *-public-entrypoint (PERMISSIVE)
 kubectl get destinationrule    -n staging    # 10 rule ISTIO_MUTUAL
 kubectl get virtualservice     -n staging    # tax-retry, order-retry
-kubectl get authorizationpolicy -n staging   # product-allow-callers
+kubectl get authorizationpolicy -n staging   # 9 *-allow-callers (product, cart, media, ...)
 
 # App vẫn truy cập được qua ingress? (STRICT không được làm hỏng cái này)
 LB_IP=129.212.208.194
-curl -s -o /dev/null -w 'storefront.staging = %{http_code}\n' -H 'Host: storefront.staging.yas.local.com' http://$LB_IP/
+curl -s -o /dev/null -w 'storefront.staging   = %{http_code}\n' -H 'Host: storefront.staging.yas.local.com' http://$LB_IP/
+# Swagger fetch được api-docs của backend? (phải 200, KHÔNG 503)
+curl -s -o /dev/null -w 'product api-docs     = %{http_code}\n' -H 'Host: api.staging.yas.local.com' http://$LB_IP/product/v3/api-docs
+# Ảnh media load được? (phải 200/500-app, KHÔNG 503)
+curl -s -o /dev/null -w 'media /medias        = %{http_code}\n' -H 'Host: api.staging.yas.local.com' "http://$LB_IP/media/medias?ids=1"
 # ArgoCD staging phải vẫn Healthy (authz không làm product Degraded)
 kubectl get application staging-yas-app -n argocd \
   -o jsonpath='{.status.sync.status}/{.status.health.status}{"\n"}'
@@ -633,43 +637,68 @@ cat k8s/istio/staging-demo/peer-authentication-staging-strict.yaml
 cat k8s/istio/staging-demo/public-entrypoints-staging.yaml
 ```
 
-Chỉ vào object `default-strict-mtls` (namespace `staging`, `mode: STRICT`) — mọi
-kết nối pod-to-pod trong `staging` bắt buộc phải mTLS. Giải thích 3 override
-`PERMISSIVE` cho `storefront-bff`/`backoffice-bff`/`swagger-ui` (vì được gọi từ
-ngoài mesh qua Ingress nên phải chấp nhận cả plaintext ở lối vào).
+Chỉ vào object `default-strict-mtls` (namespace `staging`, `mode: STRICT`) — đây là
+**mặc định của cả namespace**: mọi service KHÔNG có override thì bắt buộc mTLS.
+
+Giải thích các override `PERMISSIVE` trong `public-entrypoints-staging.yaml`. Chúng
+chia làm 2 nhóm, đều vì **NGINX Ingress không nằm trong mesh (không có sidecar) nên
+gửi traffic plaintext** thẳng tới service:
+- `storefront-bff` / `backoffice-bff` / `swagger-ui` — lối vào UI/Swagger.
+- **9 backend** (`product`, `media`, `cart`, `customer`, `inventory`, `order`,
+  `search`, `tax`, `sampledata`) — vì `yas-backend-apis-ingress` route trình duyệt
+  **thẳng** tới chúng: browser tải ảnh từ `/media/medias/...` và Swagger fetch
+  `/{service}/v3/api-docs`. Nếu để STRICT, NGINX plaintext → **503** (đây chính là
+  lỗi "ảnh không hiện" + "Swagger không gọi được service" đã sửa).
+
+> **Đây là pattern đúng của Istio + ingress ngoài mesh:** STRICT làm mặc định,
+> chỉ mở PERMISSIVE **đúng tại rìa** (service nhận traffic trực tiếp từ ingress).
+> mTLS giữa các service KHÔNG bị yếu đi vì `DestinationRule ISTIO_MUTUAL` ép mọi
+> client trong mesh luôn dùng mTLS (Kiali vẫn hiện ổ khóa xanh), và
+> `AuthorizationPolicy` vẫn chặn theo danh tính SPIFFE (xem bằng chứng bên dưới).
 
 Xác nhận đã áp trên cụm:
 
 ```bash
-# Mục đích: xác nhận STRICT đã có hiệu lực trên namespace staging
-kubectl get peerauthentication -n staging
+# Mục đích: xác nhận STRICT default + các override PERMISSIVE tại rìa
+kubectl get peerauthentication -n staging   # default-strict-mtls (STRICT) + 12 *-public-entrypoint (PERMISSIVE)
 ```
 
 **Bước 2 — Chạy kịch bản chứng minh STRICT chặn plaintext:**
 
-Dùng `-v` để thầy thấy rõ thông điệp "Connection reset by peer" (thuyết phục hơn xem exit code):
+Vì các backend expose qua ingress giờ là PERMISSIVE, ta chứng minh STRICT trên
+**`httpbin`** — service nội bộ (chỉ gọi trong mesh, không expose ra ingress) nên vẫn
+giữ STRICT mặc định. Dùng `-v` để thầy thấy rõ "Connection reset by peer":
 
 ```bash
-# Mục đích: chứng minh STRICT chặn plaintext — gọi từ istio-proxy (bỏ qua mTLS) sẽ bị Envoy reset
+# Mục đích: chứng minh STRICT chặn plaintext — gọi httpbin (STRICT) từ istio-proxy (bỏ qua mTLS) sẽ bị Envoy reset
 kubectl exec -n staging deploy/tax -c istio-proxy -- \
-  curl -sv -m 8 http://product.staging.svc.cluster.local/ 2>&1 | \
+  curl -sv -m 8 http://httpbin.staging.svc.cluster.local:8000/get 2>&1 | \
   grep -E 'Connected to|Recv failure|reset|empty'
 ```
 
 **Kỳ vọng (kết quả ĐÚNG):**
 ```
-* Connected to product.staging.svc.cluster.local (10.x.x.x) port 80
+* Connected to httpbin.staging.svc.cluster.local (10.x.x.x) port 8000
 * Recv failure: Connection reset by peer
 ```
 tức curl kết nối được TCP nhưng bị Envoy reset → **`exit code 56`** (hoặc `52`
 "empty reply"). Kiểm tra exit code: chạy lại không có `grep` rồi `echo $?`.
 
-> **Giải thích cho thầy:** "Em cố tình chạy `curl` từ **bên trong container
-> `istio-proxy`** (UID 1337). Istio loại UID này khỏi iptables capture, nên
-> request đi ra dưới dạng **plaintext**, không qua mTLS. Vì `product` đang ở chế
-> độ `STRICT`, Envoy của nó **từ chối** kết nối không mã hóa → connection reset.
-> Đây chính là bằng chứng mTLS STRICT đang được thực thi. Nếu là traffic hợp lệ
-> (từ sidecar), nó sẽ được mã hóa bằng chứng chỉ SPIFFE tự động và đi qua bình thường."
+> **Giải thích cho thầy:** "Em chạy `curl` từ **container `istio-proxy`** (UID 1337)
+> — Istio loại UID này khỏi iptables capture nên request đi ra **plaintext**, không
+> qua mTLS. Vì `httpbin` ở `STRICT`, Envoy của nó **từ chối** kết nối không mã hóa →
+> connection reset. Traffic hợp lệ (từ sidecar) sẽ tự mã hóa bằng chứng chỉ SPIFFE
+> và đi qua bình thường. Các backend expose ra ngoài (product/media/...) em để
+> PERMISSIVE để NGINX plaintext vào được, nhưng chúng vẫn được bảo vệ bằng
+> `AuthorizationPolicy` theo danh tính — plaintext không có danh tính sẽ bị **403**."
+
+> **(Tùy chọn) Chứng minh authz thay STRICT trên product** — plaintext (không danh
+> tính) tới path không public bị chặn 403:
+> ```bash
+> kubectl exec -n staging deploy/tax -c istio-proxy -- \
+>   curl -s -o /dev/null -w '%{http_code}\n' -m 8 \
+>   http://product.staging.svc.cluster.local/actuator/health   # 403 (RBAC: access denied)
+> ```
 
 > ⚠️ **Nếu gặp `exit code 6` ("Couldn't resolve host")** → **KHÔNG phải** kết quả
 > demo, mà là **CoreDNS chập chờn thoáng qua** (cụm đang căng RAM). Đây là lỗi DNS,

@@ -1,5 +1,11 @@
 # Istio AuthorizationPolicies for staging namespace
-# Secures all microservices while exposing Swagger docs and static media publicly.
+# Model: default-deny by identity (mTLS SPIFFE principal) for service-to-service
+# traffic, PLUS explicit "public path" allow-rules (to-only, any source) for the
+# endpoints the browser/Swagger fetch straight through the NGINX ingress:
+#   - every service's OpenAPI doc:   /<service>/v3/api-docs   (Swagger UI)
+#   - media image files:             /media/medias*           (storefront images)
+# NOTE: public paths carry the service's Spring context-path (/<service>), because
+# the NGINX ingress does NOT strip the prefix before forwarding.
 
 # 1. Product Service Policy
 apiVersion: security.istio.io/v1
@@ -24,7 +30,7 @@ spec:
     - to:
         - operation:
             paths:
-              - /v3/api-docs
+              - /product/v3/api-docs*
 
 ---
 # 2. Cart Service Policy
@@ -47,7 +53,7 @@ spec:
     - to:
         - operation:
             paths:
-              - /v3/api-docs
+              - /cart/v3/api-docs*
 
 ---
 # 3. Customer Service Policy
@@ -71,7 +77,7 @@ spec:
     - to:
         - operation:
             paths:
-              - /v3/api-docs
+              - /customer/v3/api-docs*
 
 ---
 # 4. Inventory Service Policy
@@ -96,10 +102,12 @@ spec:
     - to:
         - operation:
             paths:
-              - /v3/api-docs
+              - /inventory/v3/api-docs*
 
 ---
 # 5. Media Service Policy
+# Media image files are loaded directly by the browser (media.publicUrl points at
+# the api host), so /media/medias* must be reachable from any source (plaintext ingress).
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
@@ -120,8 +128,8 @@ spec:
     - to:
         - operation:
             paths:
-              - /v3/api-docs
-              - /media/**
+              - /media/v3/api-docs*
+              - /media/medias*
 
 ---
 # 6. Order Service Policy
@@ -144,7 +152,7 @@ spec:
     - to:
         - operation:
             paths:
-              - /v3/api-docs
+              - /order/v3/api-docs*
 
 ---
 # 7. Search Service Policy
@@ -167,7 +175,7 @@ spec:
     - to:
         - operation:
             paths:
-              - /v3/api-docs
+              - /search/v3/api-docs*
 
 ---
 # 8. Tax Service Policy
@@ -191,7 +199,7 @@ spec:
     - to:
         - operation:
             paths:
-              - /v3/api-docs
+              - /tax/v3/api-docs*
 
 ---
 # 9. Sampledata Service Policy
@@ -213,5 +221,4 @@ spec:
     - to:
         - operation:
             paths:
-              - /v3/api-docs
-              - /storefront/sampledata
+              - /sampledata/v3/api-docs*
