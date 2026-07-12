@@ -285,8 +285,11 @@ jobs:
             --set "backend.extraEnvs[1].value=prod" \
             --set "backend.extraEnvs[2].name=UI_HOST" \
             --set "backend.extraEnvs[2].value=http://backoffice-ui:3000"
-          deploy_swagger "$swagger_ui_tag"
-
+           deploy_swagger "$swagger_ui_tag"
+ 
+          # Deploy backend APIs ingress for developer environment
+          sed "s/API_HOST_PLACEHOLDER/${API_HOST}/g" k8s/yas-developer-ingress.yaml | kubectl apply -n "$NAMESPACE" -f -
+ 
           kubectl rollout status deployment -n "$NAMESPACE" --timeout=15m
 
           lb_ip="$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
