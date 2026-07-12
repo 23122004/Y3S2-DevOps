@@ -116,7 +116,7 @@ media:
           storageClassName: do-block-storage
           resources:
             requests:
-              storage: 2Gi
+              storage: 10Gi
     extraVolumes:
       - name: media-application
         configMap:
