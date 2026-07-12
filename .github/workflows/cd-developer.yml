@@ -139,7 +139,7 @@ jobs:
           resolve_tag() {
             local branch="$1"
             if [ -z "$branch" ] || [ "$branch" = "main" ]; then
-              echo "latest"
+              echo "main"
               return
             fi
 

@@ -3,10 +3,10 @@ write:
   resources:
     requests:
 #       cpu: 10m
-      memory: 64Mi
+      memory: 256Mi
     limits:
 #       cpu: 100m
-      memory: 128Mi
+      memory: 1Gi
   nodeSelector:
     doks.digitalocean.com/node-pool: devops-project02-mem-opt
   persistence:
@@ -16,10 +16,10 @@ read:
   resources:
     requests:
 #       cpu: 10m
-      memory: 64Mi
+      memory: 256Mi
     limits:
 #       cpu: 100m
-      memory: 128Mi
+      memory: 1Gi
   nodeSelector:
     doks.digitalocean.com/node-pool: devops-project02-mem-opt
 backend:
@@ -27,10 +27,10 @@ backend:
   resources:
     requests:
 #       cpu: 10m
-      memory: 64Mi
+      memory: 256Mi
     limits:
 #       cpu: 100m
-      memory: 128Mi
+      memory: 1Gi
   nodeSelector:
     doks.digitalocean.com/node-pool: devops-project02-mem-opt
   persistence:
@@ -54,6 +54,7 @@ loki:
       chunks: chunks
       ruler: ruler
       admin: admin
+  useTestSchema: true
 test:
   enabled: false
 storage:
