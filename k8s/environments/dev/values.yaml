@@ -8,13 +8,13 @@ product:
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 cart:
   backend:
     image:
@@ -23,13 +23,13 @@ cart:
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 order:
   backend:
     image:
@@ -38,13 +38,13 @@ order:
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 customer:
   backend:
     image:
@@ -53,13 +53,13 @@ customer:
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 inventory:
   backend:
     image:
@@ -68,13 +68,13 @@ inventory:
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 tax:
   backend:
     image:
@@ -83,13 +83,13 @@ tax:
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 media:
   backend:
     image:
@@ -98,13 +98,13 @@ media:
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
     extraObjects:
       - apiVersion: v1
         kind: PersistentVolumeClaim
@@ -137,13 +137,13 @@ search:
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 sampledata:
   backend:
     image:
@@ -152,13 +152,13 @@ sampledata:
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 storefront-ui:
   ui:
     image:
@@ -194,7 +194,7 @@ storefront-bff:
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
@@ -206,7 +206,7 @@ storefront-bff:
       - name: SPRING_CLOUD_GATEWAY_ROUTES_0_URI
         value: "http://nginx-dev"
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
     ingress:
       host: storefront.dev.yas.local.com
 backoffice-bff:
@@ -217,7 +217,7 @@ backoffice-bff:
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
@@ -229,7 +229,7 @@ backoffice-bff:
       - name: SPRING_CLOUD_GATEWAY_ROUTES_0_URI
         value: "http://nginx-dev"
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
     ingress:
       host: backoffice.dev.yas.local.com
 swagger-ui:
