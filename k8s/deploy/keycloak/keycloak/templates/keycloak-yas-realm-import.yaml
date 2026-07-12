@@ -536,6 +536,7 @@ spec:
           - {{ .Values.backofficeRedirectUrl }}/*
           - http://backoffice.dev.yas.local.com/*
           - http://backoffice.staging.yas.local.com/*
+          - http://backoffice-developer.yas.local.com/*
           - http://localhost:3000/*
           - http://localhost:8087/*
         webOrigins: [ ]
@@ -832,6 +833,7 @@ spec:
           - {{ .Values.storefrontRedirectUrl }}/*
           - http://storefront.dev.yas.local.com/*
           - http://storefront.staging.yas.local.com/*
+          - http://developer.yas.local.com/*
           - http://localhost:8087/*
         webOrigins: [ ]
         notBefore: 0
