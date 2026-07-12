@@ -2,7 +2,7 @@ username: yasadminuser
 password: admin
 replicas: 1
 postgresqlVersion: "15"
-volumeSize: "10Gi"
+volumeSize: "20Gi"
 maxConnections: "500"
 resources:
   requests:
