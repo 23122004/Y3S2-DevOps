@@ -27,3 +27,99 @@ spec:
   selector:
     matchLabels: { app.kubernetes.io/name: swagger-ui }
   mtls: { mode: PERMISSIVE }
+---
+# Backend services reached DIRECTLY by the browser/Swagger through the NGINX
+# ingress (yas-backend-apis-ingress: /product, /media, ...). NGINX has no Istio
+# sidecar, so it forwards plaintext; under the namespace STRICT default those
+# connections would be reset (503). PERMISSIVE lets them accept plaintext at the
+# edge, while in-mesh callers still use mTLS (forced by the ISTIO_MUTUAL
+# DestinationRules) and identity is still enforced by the AuthorizationPolicies.
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: product-public-entrypoint
+  namespace: staging
+spec:
+  selector:
+    matchLabels: { app.kubernetes.io/name: product }
+  mtls: { mode: PERMISSIVE }
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: media-public-entrypoint
+  namespace: staging
+spec:
+  selector:
+    matchLabels: { app.kubernetes.io/name: media }
+  mtls: { mode: PERMISSIVE }
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: cart-public-entrypoint
+  namespace: staging
+spec:
+  selector:
+    matchLabels: { app.kubernetes.io/name: cart }
+  mtls: { mode: PERMISSIVE }
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: customer-public-entrypoint
+  namespace: staging
+spec:
+  selector:
+    matchLabels: { app.kubernetes.io/name: customer }
+  mtls: { mode: PERMISSIVE }
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: inventory-public-entrypoint
+  namespace: staging
+spec:
+  selector:
+    matchLabels: { app.kubernetes.io/name: inventory }
+  mtls: { mode: PERMISSIVE }
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: order-public-entrypoint
+  namespace: staging
+spec:
+  selector:
+    matchLabels: { app.kubernetes.io/name: order }
+  mtls: { mode: PERMISSIVE }
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: search-public-entrypoint
+  namespace: staging
+spec:
+  selector:
+    matchLabels: { app.kubernetes.io/name: search }
+  mtls: { mode: PERMISSIVE }
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: tax-public-entrypoint
+  namespace: staging
+spec:
+  selector:
+    matchLabels: { app.kubernetes.io/name: tax }
+  mtls: { mode: PERMISSIVE }
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: sampledata-public-entrypoint
+  namespace: staging
+spec:
+  selector:
+    matchLabels: { app.kubernetes.io/name: sampledata }
+  mtls: { mode: PERMISSIVE }
