@@ -1,4 +1,4 @@
-# Istio AuthorizationPolicies for yas namespace
+# Istio AuthorizationPolicies for staging namespace
 # Secures all microservices while exposing Swagger docs and static media publicly.
 
 # 1. Product Service Policy
@@ -6,7 +6,7 @@ apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
   name: product-allow-callers
-  namespace: yas
+  namespace: staging
 spec:
   selector:
     matchLabels:
@@ -16,11 +16,11 @@ spec:
     - from:
         - source:
             principals:
-              - cluster.local/ns/yas/sa/order
-              - cluster.local/ns/yas/sa/cart
-              - cluster.local/ns/yas/sa/search
-              - cluster.local/ns/yas/sa/storefront-bff
-              - cluster.local/ns/yas/sa/backoffice-bff
+              - cluster.local/ns/staging/sa/order
+              - cluster.local/ns/staging/sa/cart
+              - cluster.local/ns/staging/sa/search
+              - cluster.local/ns/staging/sa/storefront-bff
+              - cluster.local/ns/staging/sa/backoffice-bff
     - to:
         - operation:
             paths:
@@ -32,7 +32,7 @@ apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
   name: cart-allow-callers
-  namespace: yas
+  namespace: staging
 spec:
   selector:
     matchLabels:
@@ -42,8 +42,8 @@ spec:
     - from:
         - source:
             principals:
-              - cluster.local/ns/yas/sa/storefront-bff
-              - cluster.local/ns/yas/sa/backoffice-bff
+              - cluster.local/ns/staging/sa/storefront-bff
+              - cluster.local/ns/staging/sa/backoffice-bff
     - to:
         - operation:
             paths:
@@ -55,7 +55,7 @@ apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
   name: customer-allow-callers
-  namespace: yas
+  namespace: staging
 spec:
   selector:
     matchLabels:
@@ -65,9 +65,9 @@ spec:
     - from:
         - source:
             principals:
-              - cluster.local/ns/yas/sa/order
-              - cluster.local/ns/yas/sa/storefront-bff
-              - cluster.local/ns/yas/sa/backoffice-bff
+              - cluster.local/ns/staging/sa/order
+              - cluster.local/ns/staging/sa/storefront-bff
+              - cluster.local/ns/staging/sa/backoffice-bff
     - to:
         - operation:
             paths:
@@ -79,7 +79,7 @@ apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
   name: inventory-allow-callers
-  namespace: yas
+  namespace: staging
 spec:
   selector:
     matchLabels:
@@ -89,10 +89,10 @@ spec:
     - from:
         - source:
             principals:
-              - cluster.local/ns/yas/sa/product
-              - cluster.local/ns/yas/sa/order
-              - cluster.local/ns/yas/sa/storefront-bff
-              - cluster.local/ns/yas/sa/backoffice-bff
+              - cluster.local/ns/staging/sa/product
+              - cluster.local/ns/staging/sa/order
+              - cluster.local/ns/staging/sa/storefront-bff
+              - cluster.local/ns/staging/sa/backoffice-bff
     - to:
         - operation:
             paths:
@@ -104,7 +104,7 @@ apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
   name: media-allow-callers
-  namespace: yas
+  namespace: staging
 spec:
   selector:
     matchLabels:
@@ -114,9 +114,9 @@ spec:
     - from:
         - source:
             principals:
-              - cluster.local/ns/yas/sa/product
-              - cluster.local/ns/yas/sa/storefront-bff
-              - cluster.local/ns/yas/sa/backoffice-bff
+              - cluster.local/ns/staging/sa/product
+              - cluster.local/ns/staging/sa/storefront-bff
+              - cluster.local/ns/staging/sa/backoffice-bff
     - to:
         - operation:
             paths:
@@ -129,7 +129,7 @@ apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
   name: order-allow-callers
-  namespace: yas
+  namespace: staging
 spec:
   selector:
     matchLabels:
@@ -139,8 +139,8 @@ spec:
     - from:
         - source:
             principals:
-              - cluster.local/ns/yas/sa/storefront-bff
-              - cluster.local/ns/yas/sa/backoffice-bff
+              - cluster.local/ns/staging/sa/storefront-bff
+              - cluster.local/ns/staging/sa/backoffice-bff
     - to:
         - operation:
             paths:
@@ -152,7 +152,7 @@ apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
   name: search-allow-callers
-  namespace: yas
+  namespace: staging
 spec:
   selector:
     matchLabels:
@@ -162,8 +162,8 @@ spec:
     - from:
         - source:
             principals:
-              - cluster.local/ns/yas/sa/storefront-bff
-              - cluster.local/ns/yas/sa/backoffice-bff
+              - cluster.local/ns/staging/sa/storefront-bff
+              - cluster.local/ns/staging/sa/backoffice-bff
     - to:
         - operation:
             paths:
@@ -175,7 +175,7 @@ apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
   name: tax-allow-callers
-  namespace: yas
+  namespace: staging
 spec:
   selector:
     matchLabels:
@@ -185,9 +185,9 @@ spec:
     - from:
         - source:
             principals:
-              - cluster.local/ns/yas/sa/order
-              - cluster.local/ns/yas/sa/storefront-bff
-              - cluster.local/ns/yas/sa/backoffice-bff
+              - cluster.local/ns/staging/sa/order
+              - cluster.local/ns/staging/sa/storefront-bff
+              - cluster.local/ns/staging/sa/backoffice-bff
     - to:
         - operation:
             paths:
@@ -199,7 +199,7 @@ apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
   name: sampledata-allow-callers
-  namespace: yas
+  namespace: staging
 spec:
   selector:
     matchLabels:
@@ -209,7 +209,7 @@ spec:
     - from:
         - source:
             principals:
-              - cluster.local/ns/yas/sa/backoffice-bff
+              - cluster.local/ns/staging/sa/backoffice-bff
     - to:
         - operation:
             paths:
