@@ -1,44 +1,18 @@
-# Istio AuthorizationPolicy for the YAS mesh (namespace: yas)
-#
-# Requirement (huy_job): "only allow order-service to call product-service,
-# block other services" + prove enforcement with curl from a pod.
-#
-# Design note:
-#   product is called by more than just order in the live shop (the BFFs and
-#   cart browse products). A literal "order-only" rule would break the running
-#   storefront that must stay demoable. So the APPLIED policy below is an
-#   allow-list of product's *real* callers; every other workload identity is
-#   implicitly DENIED (an ALLOW policy denies anything not matched).
-#
-#   The exact assignment scenario (product reachable ONLY from order) is shipped
-#   separately in authorization-policy-strict-demo.yaml for a clean allow/deny
-#   demonstration.
-#
-# How enforcement is proven:
-#   ALLOW  -> exec into `order` pod, curl product  => HTTP 200
-#   DENY   -> exec into `tax`   pod, curl product  => HTTP 403 (RBAC: access denied)
-#
-# Principals are the SPIFFE identities minted from each service's ServiceAccount
-# under STRICT mTLS: cluster.local/ns/yas/sa/<service>.
----
+# Istio AuthorizationPolicies for yas namespace
+# Secures all microservices while exposing Swagger docs and static media publicly.
+
+# 1. Product Service Policy
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
   name: product-allow-callers
   namespace: yas
-  labels:
-    app.kubernetes.io/part-of: yas
-    security.istio.io/purpose: service-to-service-authz
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: product
   action: ALLOW
   rules:
-    # Legitimate internal callers of product-service. Every other workload
-    # identity is implicitly DENIED. kube-probe liveness/readiness traffic is
-    # auto-rewritten by Istio to the pilot-agent (:15020) and bypasses authz,
-    # so no health-path exception is required here.
     - from:
         - source:
             principals:
@@ -47,3 +21,197 @@ spec:
               - cluster.local/ns/yas/sa/search
               - cluster.local/ns/yas/sa/storefront-bff
               - cluster.local/ns/yas/sa/backoffice-bff
+    - to:
+        - operation:
+            paths:
+              - /v3/api-docs
+
+---
+# 2. Cart Service Policy
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: cart-allow-callers
+  namespace: yas
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cart
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/yas/sa/storefront-bff
+              - cluster.local/ns/yas/sa/backoffice-bff
+    - to:
+        - operation:
+            paths:
+              - /v3/api-docs
+
+---
+# 3. Customer Service Policy
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: customer-allow-callers
+  namespace: yas
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: customer
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/yas/sa/order
+              - cluster.local/ns/yas/sa/storefront-bff
+              - cluster.local/ns/yas/sa/backoffice-bff
+    - to:
+        - operation:
+            paths:
+              - /v3/api-docs
+
+---
+# 4. Inventory Service Policy
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: inventory-allow-callers
+  namespace: yas
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: inventory
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/yas/sa/product
+              - cluster.local/ns/yas/sa/order
+              - cluster.local/ns/yas/sa/storefront-bff
+              - cluster.local/ns/yas/sa/backoffice-bff
+    - to:
+        - operation:
+            paths:
+              - /v3/api-docs
+
+---
+# 5. Media Service Policy
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: media-allow-callers
+  namespace: yas
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: media
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/yas/sa/product
+              - cluster.local/ns/yas/sa/storefront-bff
+              - cluster.local/ns/yas/sa/backoffice-bff
+    - to:
+        - operation:
+            paths:
+              - /v3/api-docs
+              - /media/**
+
+---
+# 6. Order Service Policy
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: order-allow-callers
+  namespace: yas
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: order
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/yas/sa/storefront-bff
+              - cluster.local/ns/yas/sa/backoffice-bff
+    - to:
+        - operation:
+            paths:
+              - /v3/api-docs
+
+---
+# 7. Search Service Policy
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: search-allow-callers
+  namespace: yas
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: search
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/yas/sa/storefront-bff
+              - cluster.local/ns/yas/sa/backoffice-bff
+    - to:
+        - operation:
+            paths:
+              - /v3/api-docs
+
+---
+# 8. Tax Service Policy
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: tax-allow-callers
+  namespace: yas
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tax
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/yas/sa/order
+              - cluster.local/ns/yas/sa/storefront-bff
+              - cluster.local/ns/yas/sa/backoffice-bff
+    - to:
+        - operation:
+            paths:
+              - /v3/api-docs
+
+---
+# 9. Sampledata Service Policy
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: sampledata-allow-callers
+  namespace: yas
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sampledata
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/yas/sa/backoffice-bff
+    - to:
+        - operation:
+            paths:
+              - /v3/api-docs
+              - /storefront/sampledata
