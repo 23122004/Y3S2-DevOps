@@ -243,7 +243,8 @@ jobs:
           helm dependency build ./k8s/charts/yas-configuration >/dev/null
           helm upgrade --install yas-configuration ./k8s/charts/yas-configuration \
             --namespace "$NAMESPACE" \
-            --create-namespace
+            --create-namespace \
+            --set "mediaApplicationConfig.yas.publicUrl=http://${API_HOST}/media"
 
           product_tag="$(resolve_tag "$PRODUCT_BRANCH")"
           cart_tag="$(resolve_tag "$CART_BRANCH")"
