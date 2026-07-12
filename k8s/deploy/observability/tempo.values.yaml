@@ -1,11 +1,13 @@
 tempo:
+  # 128Mi was fine while 0 spans flowed; once real traces ingest (after the
+  # agent 2.6.0->2.29.0 fix) Tempo OOMKills at 128Mi. Raised to fit WAL+blocks.
   resources:
     requests:
 #       cpu: 10m
-      memory: 64Mi
+      memory: 256Mi
     limits:
 #       cpu: 100m
-      memory: 128Mi
+      memory: 512Mi
   nodeSelector:
     doks.digitalocean.com/node-pool: devops-project02-mem-opt
   metricsGenerator:
