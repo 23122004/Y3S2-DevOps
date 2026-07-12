@@ -233,6 +233,7 @@ jobs:
               --set "ingress.hosts[0].host=${API_HOST}" \
               --set "ingress.hosts[0].paths[0].path=/swagger-ui" \
               --set "ingress.hosts[0].paths[0].pathType=ImplementationSpecific" \
+              --set "urls=[{url: 'http://${API_HOST}/product/v3/api-docs'\,name: 'Product'}\,{url: 'http://${API_HOST}/media/v3/api-docs'\,name: 'Media'}\,{url: 'http://${API_HOST}/customer/v3/api-docs'\,name: 'Customer'}\,{url: 'http://${API_HOST}/cart/v3/api-docs'\,name: 'Cart'}\,{url: 'http://${API_HOST}/order/v3/api-docs'\,name: 'Order'}\,{url: 'http://${API_HOST}/inventory/v3/api-docs'\,name: 'Inventory'}\,{url: 'http://${API_HOST}/tax/v3/api-docs'\,name: 'Tax'}\,{url: 'http://${API_HOST}/search/v3/api-docs'\,name: 'Search'}]" \
               "${swagger_common_args[@]}"
           }
 
@@ -270,7 +271,7 @@ jobs:
           deploy_backend sampledata yas-sampledata "$sampledata_tag"
           deploy_ui storefront-ui yas-storefront-ui "$storefront_ui_tag" \
             --set "ui.extraEnvs[0].name=API_BASE_PATH" \
-            --set-string "ui.extraEnvs[0].value=http://${DEVELOPER_HOST}/api"
+            --set-string "ui.extraEnvs[0].value=http://storefront-bff/api"
           deploy_ui backoffice-ui yas-backoffice-ui "$backoffice_ui_tag"
           deploy_backend storefront-bff yas-storefront-bff "$storefront_bff_tag" \
             --set "backend.ingress.host=${DEVELOPER_HOST}" \
