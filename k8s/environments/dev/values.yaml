@@ -4,7 +4,7 @@ product:
   backend:
     image:
       repository: ghcr.io/23122004/yas-product
-      tag: ac4cc5324b116f5863c179c22dea982cceb136ca
+      tag: 837b5f6f01ae12567efddb7e6386f43aeb2514d1
     resources:
       requests:
         cpu: 50m
@@ -19,7 +19,7 @@ cart:
   backend:
     image:
       repository: ghcr.io/23122004/yas-cart
-      tag: ac4cc5324b116f5863c179c22dea982cceb136ca
+      tag: 837b5f6f01ae12567efddb7e6386f43aeb2514d1
     resources:
       requests:
         cpu: 50m
@@ -34,7 +34,7 @@ order:
   backend:
     image:
       repository: ghcr.io/23122004/yas-order
-      tag: ac4cc5324b116f5863c179c22dea982cceb136ca
+      tag: 837b5f6f01ae12567efddb7e6386f43aeb2514d1
     resources:
       requests:
         cpu: 50m
@@ -49,7 +49,7 @@ customer:
   backend:
     image:
       repository: ghcr.io/23122004/yas-customer
-      tag: ac4cc5324b116f5863c179c22dea982cceb136ca
+      tag: 837b5f6f01ae12567efddb7e6386f43aeb2514d1
     resources:
       requests:
         cpu: 50m
@@ -64,7 +64,7 @@ inventory:
   backend:
     image:
       repository: ghcr.io/23122004/yas-inventory
-      tag: ac4cc5324b116f5863c179c22dea982cceb136ca
+      tag: 837b5f6f01ae12567efddb7e6386f43aeb2514d1
     resources:
       requests:
         cpu: 50m
@@ -79,7 +79,7 @@ tax:
   backend:
     image:
       repository: ghcr.io/23122004/yas-tax
-      tag: ac4cc5324b116f5863c179c22dea982cceb136ca
+      tag: 837b5f6f01ae12567efddb7e6386f43aeb2514d1
     resources:
       requests:
         cpu: 50m
@@ -94,7 +94,7 @@ media:
   backend:
     image:
       repository: ghcr.io/23122004/yas-media
-      tag: ac4cc5324b116f5863c179c22dea982cceb136ca
+      tag: 837b5f6f01ae12567efddb7e6386f43aeb2514d1
     resources:
       requests:
         cpu: 50m
@@ -133,7 +133,7 @@ search:
   backend:
     image:
       repository: ghcr.io/23122004/yas-search
-      tag: ac4cc5324b116f5863c179c22dea982cceb136ca
+      tag: 837b5f6f01ae12567efddb7e6386f43aeb2514d1
     resources:
       requests:
         cpu: 50m
@@ -148,7 +148,7 @@ sampledata:
   backend:
     image:
       repository: ghcr.io/23122004/yas-sampledata
-      tag: ac4cc5324b116f5863c179c22dea982cceb136ca
+      tag: 837b5f6f01ae12567efddb7e6386f43aeb2514d1
     resources:
       requests:
         cpu: 50m
@@ -163,7 +163,7 @@ storefront-ui:
   ui:
     image:
       repository: ghcr.io/23122004/yas-storefront-ui
-      tag: ac4cc5324b116f5863c179c22dea982cceb136ca
+      tag: 837b5f6f01ae12567efddb7e6386f43aeb2514d1
     resources:
       requests:
         cpu: 50m
@@ -178,7 +178,7 @@ backoffice-ui:
   ui:
     image:
       repository: ghcr.io/23122004/yas-backoffice-ui
-      tag: ac4cc5324b116f5863c179c22dea982cceb136ca
+      tag: 837b5f6f01ae12567efddb7e6386f43aeb2514d1
     resources:
       requests:
         cpu: 50m
@@ -190,7 +190,7 @@ storefront-bff:
   backend:
     image:
       repository: ghcr.io/23122004/yas-storefront-bff
-      tag: ac4cc5324b116f5863c179c22dea982cceb136ca
+      tag: 837b5f6f01ae12567efddb7e6386f43aeb2514d1
     resources:
       requests:
         cpu: 50m
@@ -213,7 +213,7 @@ backoffice-bff:
   backend:
     image:
       repository: ghcr.io/23122004/yas-backoffice-bff
-      tag: ac4cc5324b116f5863c179c22dea982cceb136ca
+      tag: 837b5f6f01ae12567efddb7e6386f43aeb2514d1
     resources:
       requests:
         cpu: 50m
@@ -235,7 +235,7 @@ backoffice-bff:
 swagger-ui:
   image:
     repository: ghcr.io/23122004/yas-swagger-ui
-    tag: ac4cc5324b116f5863c179c22dea982cceb136ca
+    tag: 837b5f6f01ae12567efddb7e6386f43aeb2514d1
   resources:
     requests:
       cpu: 50m
