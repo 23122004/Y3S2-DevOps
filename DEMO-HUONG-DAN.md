@@ -632,7 +632,7 @@ kèm event "auto-sync". Giải thích: "Git là source of truth — mọi drift 
 **Bước 1 — Cho thầy xem file cấu hình `PeerAuthentication` STRICT:**
 
 ```bash
-# Mục đích: xem file cấu hình mTLS STRICT + 3 override PERMISSIVE cho BFF/swagger
+# Mục đích: xem file cấu hình mTLS STRICT (default) + các override PERMISSIVE tại rìa (BFF/swagger + 9 backend)
 cat k8s/istio/staging-demo/peer-authentication-staging-strict.yaml
 cat k8s/istio/staging-demo/public-entrypoints-staging.yaml
 ```
@@ -795,13 +795,23 @@ kubectl logs -n staging deploy/product -c istio-proxy | grep rbac_access_denied 
 
 **(Tùy chọn) Bản demo đúng nguyên văn đề "chỉ order gọi được product":**
 
+> ⚠️ **Phải test bằng 2 pod `mesh-tester`, KHÔNG dùng `deploy/... -c istio-proxy`.**
+> Curl từ container `istio-proxy` (UID 1337) đi ra **plaintext, KHÔNG mang danh
+> tính SPIFFE** → cả `order` lẫn service khác đều bị **403** (không chứng minh được
+> "chỉ order được vào"). `mesh-tester-order` (SA `order`) và `mesh-tester-default`
+> (SA `default`) gửi request **qua sidecar** nên mới có danh tính mTLS đúng.
+
 ```bash
 # Mục đích: bản demo đúng nguyên văn đề "chỉ order gọi được product" (nhớ KHÔI PHỤC sau khi demo)
 kubectl apply -f k8s/istio/staging-demo/demo/authorization-policy-strict-demo-staging.yaml
-kubectl exec -n staging deploy/order -c istio-proxy -- \
-  curl -s -o /dev/null -w '%{http_code}\n' http://product.staging.svc.cluster.local/actuator/health   # 200
-kubectl exec -n staging deploy/tax -c istio-proxy -- \
-  curl -s -o /dev/null -w '%{http_code}\n' http://product.staging.svc.cluster.local/actuator/health   # 403
+
+# order (danh tính sa/order) NẰM trong allow-list → được vào (KHÔNG 403; thường 404 vì '/' không phải route thật)
+kubectl exec -n staging mesh-tester-order -c tester -- \
+  curl -s -o /dev/null -w '%{http_code}\n' http://product.staging.svc.cluster.local/
+# default (đại diện service ngoài allow-list) → bị chặn 403
+kubectl exec -n staging mesh-tester-default -c tester -- \
+  curl -s -o /dev/null -w '%{http_code}\n' http://product.staging.svc.cluster.local/
+
 # KHÔI PHỤC ngay (nếu không storefront sẽ 403 khi xem product):
 kubectl delete -f k8s/istio/staging-demo/demo/authorization-policy-strict-demo-staging.yaml
 ```
