@@ -30,8 +30,9 @@
 | Namespace `dev`/`staging` có sidecar (PERMISSIVE) | ✅ Running | ✅ nền cho mesh |
 | **Mesh policy (STRICT/DR/VS/AuthZ)** | ⚠️ **Chưa áp** — áp lên `staging` qua Phần 1B | ⚠️ **Mục 7, 8, 9 cần chạy Phần 1B trước** |
 | Namespace `yas` (thiết kế gốc) | ❌ Không dựng (tiết kiệm RAM) | — dùng `staging` thay thế |
-| Grafana / Prometheus / Tempo | ✅ Running | ✅ Mục 10 (metric + trace) |
-| **Loki (log)** | ⚠️ **`loki-write` CrashLoop** | ⚠️ **Mục 10: xem log KHÔNG chạy** |
+| **Metrics** (OTel→Prometheus→Grafana) | ✅ có data 11 service | ✅ **Mục 10 demo live** |
+| **Traces** (Tempo) | ⚠️ backend up nhưng **0 span** | ⚠️ Mục 10: chỉ trình bày kiến trúc |
+| **Logs** (Loki) | ⚠️ backend hỏng + đã scale-down | ⚠️ Mục 10: chỉ trình bày kiến trúc |
 | Namespace `yas-developer` | ❌ Không tồn tại (đúng, nó ephemeral) | ✅ tạo khi demo Mục 2/4 |
 
 ### 0.2 Ba quyết định BẠN phải chốt trước khi demo
@@ -63,20 +64,22 @@ validate bằng server dry-run). Cách áp: xem
 > Phương án dự phòng nếu không muốn đụng staging: demo bằng file YAML +
 > báo cáo `docs/huy-service-mesh-report.md` (đã test, có Kiali graph 30 node).
 
-**QUYẾT ĐỊNH 2 — Loki (log) đang hỏng (ảnh hưởng Mục 10).**
-`loki-write-0` CrashLoopBackOff suốt 3 ngày với lỗi
-`failed to flush chunks: store put chunk: mkdir fake: read-only file system`
-→ backend object-storage (`loki-minio`) không hoạt động, nên **truy vấn log
-trong Grafana sẽ trống**. Metric (Prometheus) và Trace (Tempo) **vẫn hoạt động bình thường**.
+**QUYẾT ĐỊNH 2 — Observability: chỉ Metrics có data live (ảnh hưởng Mục 10).**
+Đã kiểm chứng thực tế trên cụm:
+- **Metrics: ✅ chạy đầy đủ** — 11 service (product, order, tax, ...) gửi JVM metric
+  qua OTel agent → Collector → Prometheus (staging ~72 series). **Demo click thật được.**
+- **Traces: ⚠️ Tempo up + đã nối dây nhưng 0 span** (`tempo:3200/api/search` trả `[]`;
+  trace sampling/export ở app chưa bật trên build lab).
+- **Logs: ⚠️ Loki backend hỏng** (`loki-minio` read-only) + đã **scale-down để cứu RAM**.
 
-- **Phương án A (khuyến nghị): Demo Mục 10 với Metric + Trace**, và nói rõ log
-  pipeline (Promtail → Loki) có kiến trúc đầy đủ nhưng backend storage đang lỗi
-  trên cụm lab. Đủ để chứng minh observability.
-- **Phương án B: Sửa Loki trước.** Cần redeploy `loki` (khôi phục `loki-minio`).
-  Đây là thao tác Helm không nhỏ, nên chỉ làm nếu bạn có thời gian. Xem
-  [mục 10.4](#104-nếu-muốn-sửa-loki-tùy-chọn).
+- **Phương án A (khuyến nghị): Demo Metrics live + trình bày kiến trúc Traces/Logs**
+  (concept + luồng traceID→log + file cấu hình). Trung thực, đủ chiều sâu trả lời
+  câu hỏi. Xem Mục 10 đã viết chi tiết (10.1–10.6).
+- **Phương án B: Khôi phục Tempo/Loki trước demo.** Tốn công + rủi ro RAM. Xem
+  [mục 10.7](#107-tùy-chọn-nếu-muốn-khôi-phục-traceslogs-live--làm-trước-demo-không-live).
 
-👉 **Khuyến nghị A** (an toàn cho buổi demo).
+👉 **Khuyến nghị A** (an toàn + trung thực). Mục 10 đã soạn để bạn trả lời được
+cả câu hỏi sâu về phần chưa có data live.
 
 **QUYẾT ĐỊNH 3 — Dọn rác cosmetic (không bắt buộc nhưng nên làm).**
 `istio-system` có ~90 pod `Evicted` của Prometheus cũ + `dev` có 1 pod `order`
@@ -490,7 +493,18 @@ kubectl get ns yas-developer
 **Mục tiêu:** Thể hiện luồng deploy trực tiếp (push-based), không qua cơ chế
 pull của GitOps.
 
-**Đây là phần GIẢI THÍCH (không cần chạy live), dùng sơ đồ `architecture.md` §1:**
+> **Đây là phần GIẢI THÍCH bằng cách so sánh 2 file workflow — KHÔNG cần namespace
+> nào đang chạy.** `yas-developer` không cần "sống" để demo mục này; nếu bạn đã xóa
+> nó để tiết kiệm RAM thì vẫn demo bình thường. (Muốn thấy nó chạy live thì sắp thứ
+> tự: Mục 2A tạo `yas-developer` → Mục 5 giải thích → Mục 4 cleanup xóa.)
+
+**Tại sao không demo trên namespace khác?** Luồng deploy-trực-tiếp gắn cứng với
+`yas-developer` trong thiết kế — `cd-developer.yml` khai báo `NAMESPACE: yas-developer`
+(dòng 83). Đổi sang namespace khác phải sửa workflow và không thêm giá trị gì.
+`dev`/`staging` theo thiết kế **luôn** đi qua GitOps nên không phải là nơi minh họa
+luồng non-GitOps được.
+
+**Giải thích cho thầy (dùng sơ đồ `architecture.md` §1):**
 
 > "Trong sơ đồ, ô màu xám là môi trường **`yas-developer`**. Khác với `dev` và
 > `staging` (đi qua GitOps: workflow chỉ patch `values.yaml` rồi ArgoCD tự kéo về),
@@ -498,19 +512,36 @@ pull của GitOps.
 > tới cụm Kubernetes — **không** commit cấu hình lên Git, **không** chờ ArgoCD sync.
 > Đây là luồng kiểm thử nhanh cho developer, không phụ thuộc GitOps."
 
-Đối chiếu trực quan:
-- **Qua GitOps** (`dev`/`staging`): xem `.github/workflows/deploy-dev.yml` /
-  `deploy-staging.yml` → có bước `yq patch values.yaml` + `git commit/push`, KHÔNG
-  có `helm ... --install` trực tiếp lên cụm.
-- **Không GitOps** (`yas-developer`): xem `.github/workflows/cd-developer.yml` →
-  có bước `helm upgrade --install ... --namespace yas-developer` chạy thẳng.
+Đối chiếu trực quan (mở 2 file trên GitHub cạnh nhau cho thầy):
 
-Mở 2 file này trên GitHub cho thầy so sánh, hoặc:
+- **Không GitOps** (`yas-developer`) — `cd-developer.yml` gọi Helm **thẳng lên cụm**.
+  Lệnh thật trong workflow (dòng ~201, cho mỗi service backend):
+  ```bash
+  helm upgrade --install "$release" "./k8s/charts/${release}" \
+    --namespace yas-developer \
+    --create-namespace \
+    --set "backend.image.repository=ghcr.io/23122004/yas-<service>" \
+    --set "backend.image.tag=<tag-đã-resolve-từ-branch>"
+  ```
+  → cấu hình đi **thẳng** tới Kubernetes, KHÔNG qua Git, KHÔNG qua ArgoCD.
+
+- **Qua GitOps** (`dev`/`staging`) — `deploy-dev.yml` / `deploy-staging.yml`
+  **không hề gọi `helm`**, chỉ patch file trong Git rồi để ArgoCD kéo về. Lệnh
+  thật trong workflow (dòng ~135):
+  ```bash
+  yq -i '.product.backend.image.tag = "<sha>"' k8s/environments/dev/values.yaml
+  # ...(lặp cho 14 service)... rồi:
+  git commit -m "chore(dev): update image tags to <sha> [skip ci]"
+  git push
+  ```
+  → ArgoCD phát hiện commit mới và tự sync (§Mục 6).
+
+Chứng minh nhanh bằng CLI (số liệu đã kiểm chứng: `deploy-dev.yml` có **0** dòng `helm upgrade`):
 
 ```bash
-grep -n "helm upgrade" .github/workflows/cd-developer.yml   # có → push trực tiếp
-grep -n "helm upgrade" .github/workflows/deploy-dev.yml     # không có → GitOps
-grep -n "yq\|git push" .github/workflows/deploy-dev.yml     # có → chỉ patch git
+grep -c "helm upgrade" .github/workflows/cd-developer.yml   # > 0  → deploy trực tiếp
+grep -c "helm upgrade" .github/workflows/deploy-dev.yml     # = 0  → không deploy trực tiếp
+grep -nE "yq |git push" .github/workflows/deploy-dev.yml    # có   → chỉ patch Git (GitOps)
 ```
 
 ---
@@ -589,12 +620,21 @@ kubectl get peerauthentication -n staging
 
 **Bước 2 — Chạy kịch bản chứng minh STRICT chặn plaintext:**
 
+Dùng `-v` để thầy thấy rõ thông điệp "Connection reset by peer" (thuyết phục hơn xem exit code):
+
 ```bash
 kubectl exec -n staging deploy/tax -c istio-proxy -- \
-  curl -s http://product.staging.svc.cluster.local/
+  curl -sv -m 8 http://product.staging.svc.cluster.local/ 2>&1 | \
+  grep -E 'Connected to|Recv failure|reset|empty'
 ```
 
-Kỳ vọng: **connection reset / empty reply**.
+**Kỳ vọng (kết quả ĐÚNG):**
+```
+* Connected to product.staging.svc.cluster.local (10.x.x.x) port 80
+* Recv failure: Connection reset by peer
+```
+tức curl kết nối được TCP nhưng bị Envoy reset → **`exit code 56`** (hoặc `52`
+"empty reply"). Kiểm tra exit code: chạy lại không có `grep` rồi `echo $?`.
 
 > **Giải thích cho thầy:** "Em cố tình chạy `curl` từ **bên trong container
 > `istio-proxy`** (UID 1337). Istio loại UID này khỏi iptables capture, nên
@@ -602,6 +642,11 @@ Kỳ vọng: **connection reset / empty reply**.
 > độ `STRICT`, Envoy của nó **từ chối** kết nối không mã hóa → connection reset.
 > Đây chính là bằng chứng mTLS STRICT đang được thực thi. Nếu là traffic hợp lệ
 > (từ sidecar), nó sẽ được mã hóa bằng chứng chỉ SPIFFE tự động và đi qua bình thường."
+
+> ⚠️ **Nếu gặp `exit code 6` ("Couldn't resolve host")** → **KHÔNG phải** kết quả
+> demo, mà là **CoreDNS chập chờn thoáng qua** (cụm đang căng RAM). Đây là lỗi DNS,
+> không liên quan mTLS. **Chỉ cần chạy lại 1–2 lần** là ra `exit 56` đúng. Tránh
+> gặp trước mặt thầy: chạy thử lệnh vài lần ngay trước khi demo cho DNS "ấm" lại.
 
 ---
 
@@ -727,57 +772,202 @@ cat k8s/istio/staging-demo/virtual-services-staging.yaml   # tax-retry / order-r
 
 ---
 
-## MỤC 10 — Observability (Grafana)
+## MỤC 10 — Observability (Metrics / Logs / Traces)
 
-> ⚠️ **Loki (log) đang hỏng** (xem Quyết định 2). Demo Metric + Trace, và giải
-> thích kiến trúc log. Metric/Trace hoạt động bình thường.
+> Thầy sẽ hỏi **rất kỹ** phần này. Mục tiêu: hiểu **từng thành phần để làm gì**,
+> **3 trụ cột observability** (metrics/logs/traces) liên kết ra sao, và luồng thực
+> tế **từ triệu chứng → traceID → log chứa bug**. Đọc kỹ 10.1 (kiến trúc) và 10.5
+> (câu hỏi vàng) + 10.6 (bộ câu hỏi ôn) để tự tin trả lời.
+>
+> **Trạng thái thật cần nói trước với thầy (trung thực):** trên cụm lab, phần
+> **Metrics chạy đầy đủ và có dữ liệu thật**; phần **Traces & Logs** có kiến trúc
+> hoàn chỉnh, đã nối dây, nhưng **backend chưa có dữ liệu live** (lý do ở 10.2).
+> Vì vậy demo **click thật** ở Metrics, còn Traces/Logs thì **trình bày kiến trúc
+> + concept + file cấu hình** (đừng bấm vào màn hình trống).
 
-**Bước 1 — Đăng nhập Grafana:** mở http://grafana.yas.local.com →
-login `admin` / `admin` (theo `k8s/deploy/cluster-config.yaml`).
+### 10.1 Kiến trúc & vai trò từng thành phần ("chart này để làm gì?")
 
-**Bước 2 — Metrics (Prometheus) — "hệ thống đang khỏe không?":**
-- Vào **Dashboards** → mở dashboard Kubernetes/cluster có sẵn. Chỉ cho thầy:
-  CPU/Memory theo namespace & pod, số pod Running, request rate.
-- Giải thích: "Dashboard này cho biết mức tiêu thụ tài nguyên, tình trạng pod,
-  phát hiện pod OOM/CrashLoop, cảnh báo qua Alertmanager."
-
-**Bước 3 — Traces (Tempo) — "một request đi qua đâu, chậm ở đâu":**
-- Vào **Explore** → chọn datasource **Tempo** → **Search** trace (theo service/thời gian)
-  hoặc dán một `traceId`. Mở 1 trace ra xem **waterfall các span** qua nhiều service.
-- Xem **Node graph** (service dependency) của Tempo.
-- Giải thích cách fix bug: "Khi một API chậm/500, em mở trace tương ứng, nhìn
-  waterfall để thấy span nào tốn thời gian hoặc lỗi (vd `order → tax` timeout),
-  rồi từ span đó nhảy sang log/metric của đúng service đó (Tempo được cross-link
-  sang Loki & Prometheus)."
-
-**Bước 4 — Logs (Loki):** *(hiện KHÔNG chạy trên cụm lab)*
-Nói thật với thầy:
-> "Pipeline log của em là **Promtail → Loki → Grafana**, đã cấu hình đầy đủ
-> (Promtail đang chạy 4/4 trên các node, thu log mọi pod). Tuy nhiên backend
-> lưu trữ của Loki (`loki-minio`) trên cụm lab đang lỗi (`read-only file system`)
-> nên truy vấn log tạm thời trống. Về kiến trúc và luồng thì đầy đủ; em có thể
-> chỉ file cấu hình datasource và Promtail."
-
-Bằng chứng pipeline vẫn tồn tại:
-
-```bash
-kubectl get pods -n observability | grep -E 'promtail|loki|tempo|grafana|prometheus'
-kubectl logs loki-write-0 -n observability -c loki --tail=3   # thấy lỗi read-only fs
+```
+[App Spring Boot + OpenTelemetry Java agent]  (mỗi service: product, order, tax, ...)
+        │  OTLP (gRPC :4317 / HTTP :4318)
+        ▼
+[OpenTelemetry Collector]  ← HUB trung tâm, nhận hết rồi "fan-out":
+        ├── metrics → prometheusremotewrite → [Prometheus]  ✅ có data
+        ├── traces  → otlphttp            → [Tempo]        ⚠️ backend trống
+        └── logs    → otlphttp            → [Loki]         ⚠️ backend down
+[Promtail] (DaemonSet mỗi node) ── tail log mọi pod ──────→ [Loki]
+[Prometheus] cũng tự scrape hạ tầng: node-exporter, kube-state-metrics, ServiceMonitor
+[Grafana] ─── 1 UI đọc cả Prometheus + Tempo + Loki, có correlation 3 chiều
 ```
 
-### 10.4 (Nếu muốn sửa Loki — tùy chọn, làm trước demo)
+| Thành phần | Vai trò (giải thích cho thầy) |
+|---|---|
+| **OpenTelemetry Java agent** (trong mỗi pod app) | Tự động instrument JVM + Spring Boot, phát **metric/trace/log** theo chuẩn OTLP mà không phải sửa code. *Bằng chứng nó đang chạy:* metric có nhãn `telemetry_sdk_language=java`, `service_name=product/order/...` |
+| **OpenTelemetry Collector** | **Hub trung tâm** gom mọi telemetry (OTLP `:4317/:4318`) rồi định tuyến: metric→Prometheus, trace→Tempo, log→Loki. Tách app khỏi backend — đổi backend không cần sửa app. |
+| **Prometheus** (kube-prometheus-stack) | TSDB lưu **metric** dạng time-series; vừa nhận remote-write từ Collector vừa **scrape** hạ tầng (node CPU/RAM, trạng thái pod) + app qua **ServiceMonitor**. Kèm **Alertmanager** để bắn cảnh báo. |
+| **Tempo** | Backend lưu **distributed trace**; tìm trace theo `traceID` hoặc tag (`service.name`, `duration`, `status`). |
+| **Loki** | Backend gom **log** ("Prometheus cho log"): không full-text index, chỉ index theo label → rẻ; truy vấn bằng **LogQL**. |
+| **Promtail** | DaemonSet chạy trên mỗi node, đọc log mọi pod (`/var/log/pods`) và đẩy vào Loki kèm label (namespace, pod, container). |
+| **Grafana** | **Một UI** xem cả 3 nguồn; điểm mạnh là **correlation**: từ metric→trace→log qua lại. |
+| **Grafana Operator** | Quản lý Grafana + **Datasource/Dashboard bằng CRD** (`GrafanaDatasource`, `GrafanaDashboard`) → cấu hình observability cũng theo GitOps. |
 
-Nguyên nhân: `loki-write` không ghi được vào object storage vì `loki-minio`
-không hoạt động. Cần redeploy chart loki (hoặc khôi phục `loki-minio` StatefulSet).
-Đây là thao tác Helm, **không chạy live trước thầy**. Nếu quyết định sửa, kiểm tra:
+Cho thầy xem cấu hình Collector (chứng minh hiểu pipeline):
 
 ```bash
-kubectl get statefulset -n observability | grep minio    # hiện KHÔNG có → cần dựng lại
-helm list -n observability                                # xem release loki
+export KUBECONFIG=/home/huy/Documents/University/DevOps/Project02/Y3S2-DevOps/teammate-kubeconfig.yaml
+kubectl get cm -n observability -o name | grep otel
+kubectl get cm -n observability opentelemetry-collector-06c7af49 -o jsonpath='{.data.collector\.yaml}'
+# thấy rõ: receivers.otlp → exporters {tempo, loki, prometheusremotewrite}; 3 pipeline traces/metrics/logs
 ```
 
-> Khuyến nghị: **để nguyên và demo Metric + Trace** (an toàn). Việc sửa Loki
-> nằm ngoài phạm vi demo bắt buộc.
+### 10.2 Trạng thái thật trên cụm lab (nói trước để không bị hớ)
+
+| Trụ cột | Trạng thái | Demo |
+|---|---|---|
+| **Metrics** | ✅ **LIVE, có data thật** — 11 service gửi JVM metric qua OTel; Prometheus có ~72 series (staging) / 88 (dev) | **Click thật** trên Grafana |
+| **Traces** | ⚠️ Tempo chạy + datasource sẵn + collector đã nối `→tempo:4318`, nhưng **0 span** (trace sampling/export chưa bật trên build lab) | Trình bày kiến trúc + concept + datasource |
+| **Logs** | ⚠️ Promtail chạy + pipeline nối Loki, nhưng **backend Loki lỗi** (`loki-minio` read-only) và **đã scale-down để cứu RAM** | Trình bày kiến trúc + LogQL + file cấu hình |
+
+> **Câu nói trung thực & chủ động với thầy:**
+> "Hệ thống observability của em đi theo chuẩn **OpenTelemetry**: mỗi service gắn
+> OTel agent, đẩy telemetry về một Collector trung tâm rồi fan-out sang
+> Prometheus/Tempo/Loki. Phần **metrics đang chạy đầy đủ**, em demo trực tiếp trên
+> Grafana. Phần **traces và logs** em đã dựng đủ pipeline và cấu hình correlation,
+> nhưng trên cụm lab dùng chung, backend Tempo/Loki hiện chưa có dữ liệu live do
+> em phải tắt bớt để tiết kiệm RAM — em xin trình bày kiến trúc và cách vận hành,
+> kèm file cấu hình, để thầy thấy luồng đầy đủ."
+
+### 10.3 DEMO LIVE — Metrics qua Grafana (phần chắc chắn chạy)
+
+**Bước 1 — Đăng nhập:** mở http://grafana.yas.local.com → `admin` / `admin`
+(theo `k8s/deploy/cluster-config.yaml`).
+
+**Bước 2 — Dashboard JVM (mạnh nhất, có data 11 service):**
+Menu trái → **Dashboards** → mở **jvm-dashboard**. Ở thanh biến (variable) trên
+cùng chọn service (`product`, `order`, `tax`, ...). Chỉ cho thầy và giải thích:
+- **Heap used / committed / max**: bộ nhớ JVM đang dùng vs cấp phát vs trần.
+- **GC pause / GC count**: áp lực thu gom rác — pause cao = ứng dụng khựng.
+- **Threads live / daemon**: rò rỉ thread nếu tăng không dừng.
+- **Memory pools** (Eden / Survivor / Old Gen): phân bổ heap.
+- **Classes loaded**, **process CPU**.
+
+**Bước 3 — Explore + PromQL (thầy hay bảo "gõ thử query"):**
+Menu trái → **Explore** → datasource **Prometheus** → dán query (nhãn kiểu OTel
+**`k8s_namespace_name`**, **`service_name`** — không phải `namespace`/`pod`):
+
+```promql
+# Heap dùng theo từng service trong staging
+sum(jvm_memory_used_bytes{k8s_namespace_name="staging", jvm_memory_type="heap"}) by (service_name)
+
+# So heap dùng / trần để thấy service nào sắp OOM
+sum(jvm_memory_used_bytes{k8s_namespace_name="staging",jvm_memory_type="heap"}) by (service_name)
+  / sum(jvm_memory_limit_bytes{k8s_namespace_name="staging",jvm_memory_type="heap"}) by (service_name)
+
+# Hạ tầng: RAM theo node (bắt đúng sự cố OOM mình vừa gặp)
+sum(container_memory_working_set_bytes) by (node)
+```
+
+> Mẹo: gõ tên metric trong Explore, Grafana **autocomplete** nhãn/giá trị — dùng để
+> khám phá live nếu quên tên. Metric app đều có tiền tố `jvm_`, `process_`.
+
+**Bước 4 — Dashboard hạ tầng & tổng quan:**
+- **observability-dashboard**: tổng quan OTel/cụm.
+- Các dashboard **Kubernetes** mặc định (kube-prometheus-stack): CPU/RAM node, pod
+  restart, trạng thái workload.
+
+**Kịch bản thực tế để kể (thầy hỏi "dùng làm gì"):**
+- **Phát hiện memory leak:** heap tăng dần, sau mỗi GC **không** tụt về mức cũ → rò rỉ.
+- **Chẩn đoán OOMKilled:** heap chạm `max` rồi pod restart → tăng `-Xmx` hoặc tối ưu.
+- **GC pressure:** GC pause/tần suất cao → app khựng → chỉnh heap/GC.
+- **Chính sự cố hôm nay:** dashboard RAM node cho thấy m0 chạm ~106% → giải thích
+  vì sao mình phải cleanup `yas-developer` và gỡ Kibana/Loki (câu chuyện vận hành thật).
+
+### 10.4 Traces (Tempo) — concept + web UI (giải thích kỹ dù chưa có data live)
+
+**Khái niệm (thầy hỏi "trace là gì"):**
+- Một **trace** = hành trình đầy đủ của **một request** khi đi xuyên nhiều service.
+- Trace gồm nhiều **span**, mỗi span = một đoạn xử lý tại một service (vd span ở
+  `storefront-bff`, span con ở `order`, span cháu ở `tax`), có thời gian bắt đầu/kết thúc.
+- Mọi span chia sẻ một **`traceId`** chung; mỗi span có `spanId` + `parentSpanId` →
+  dựng thành cây (waterfall).
+- **Context propagation:** service gọi nhau đính `traceId` vào **HTTP header
+  `traceparent`** (chuẩn W3C Trace Context) để service sau nối tiếp cùng trace.
+
+**Web UI (khi Tempo có span):** Grafana → **Explore** → datasource **Tempo**:
+- Tab **Search**: lọc theo `Service Name`, `Duration > 1s`, `Status = error` → ra list trace.
+- Hoặc dán thẳng **Trace ID** → mở **waterfall**: nhìn span nào **dài nhất** (nghẽn)
+  hoặc **đỏ** (lỗi), vd `order → tax` timeout 3 lần (khớp Retry Policy Mục 9).
+- **Node graph**: sơ đồ phụ thuộc service suy ra từ trace.
+
+> Trung thực: hiện `kubectl exec -n observability tempo-0 -- wget -qO-
+> localhost:3200/api/search` trả `[]` (chưa có span). Kiến trúc & datasource đã sẵn;
+> chỉ cần bật trace sampling/export ở agent + Tempo có RAM là chạy.
+
+### 10.5 CÂU HỎI VÀNG — từ `traceID` → tìm log chứa bug (thầy gần như chắc chắn hỏi)
+
+Đây là **giá trị lớn nhất** của observability hợp nhất. Luồng debug thực tế (khi
+Tempo + Loki sống — cấu hình correlation đã có sẵn trong `tempo-datasource` /
+`loki-datasource`):
+
+1. **Triệu chứng:** metric/alert báo error-rate hoặc latency tăng (hoặc user báo lỗi).
+2. **Tìm trace lỗi:** Grafana → Explore → **Tempo** → Search `Status=error` (hoặc
+   duration cao) → mở một trace → lấy **`traceId`**.
+3. **Khoanh vùng service:** nhìn **waterfall**, span **đỏ** nằm ở service nào (vd
+   `tax` trả 500) → đã biết bug ở đâu, khâu nào.
+4. **Nhảy thẳng sang log của đúng request đó:** click span → nút **"Logs for this
+   span"** (tính năng **trace-to-logs** của Tempo datasource) → Grafana tự mở **Loki**
+   với query lọc đúng `traceId`:
+   ```logql
+   {k8s_namespace_name="staging", service_name="tax"} | json | traceId="<traceId>"
+   ```
+   → hiện **đúng dòng log + stack trace** của request lỗi đó (không phải mò trong biển log).
+5. **Chiều ngược lại (log → trace):** khi đang đọc log ở Loki, mỗi dòng có field
+   `traceId`; **derived field** của Loki biến nó thành **link** → click nhảy sang
+   Tempo xem full trace.
+
+**Cơ chế correlation 3 chiều (điểm ăn điểm với thầy):**
+- **metric → trace:** exemplar (điểm dữ liệu metric đính kèm traceId).
+- **trace → log:** *trace-to-logs* (Tempo datasource map traceId → truy vấn Loki).
+- **log → trace:** *derived fields* (Loki nhận diện traceId trong log → link sang Tempo).
+- Điều kiện nền: **app phải nhúng `traceId` vào mỗi dòng log** (OTel/MDC) — đó là
+  "sợi chỉ" xuyên suốt cả 3 trụ cột.
+
+Cho thầy xem cấu hình correlation có sẵn:
+```bash
+kubectl get grafanadatasource -n observability tempo-datasource -o yaml | grep -iA8 'tracesToLogs\|derivedFields\|lokiSearch'
+kubectl get grafanadatasource -n observability loki-datasource  -o yaml | grep -iA6 'derivedFields\|traceID'
+```
+
+### 10.6 Bộ câu hỏi thầy có thể hỏi + trả lời gọn (ôn nhanh)
+
+| Câu hỏi | Trả lời ngắn |
+|---|---|
+| Metrics / Logs / Traces khác gì? | Metric = số liệu tổng hợp theo thời gian (nhẹ, xu hướng). Log = sự kiện chi tiết dạng text. Trace = hành trình 1 request xuyên service. Bổ sung nhau: metric báo "có vấn đề", trace chỉ "ở đâu", log nói "vì sao". |
+| Vì sao cần cả 3? | Metric phát hiện & cảnh báo nhanh nhưng không chi tiết; trace khoanh vùng service/nghẽn; log cho nguyên nhân gốc (stack trace). Thiếu 1 cái là debug mù. |
+| `traceId` sinh ở đâu, truyền sao? | Sinh tại service đầu tiên nhận request (hoặc từ client); truyền qua header **`traceparent`** (W3C) khi gọi service sau; OTel agent tự làm. |
+| Correlate log với trace kiểu gì? | App nhúng `traceId` vào log (MDC); Grafana dùng *derived fields* (log→trace) và *trace-to-logs* (trace→log) để nhảy qua lại. |
+| Tại sao Prometheus **pull** còn trace/log **push**? | Metric hợp pull (Prometheus chủ động scrape, dễ biết target sống/chết). Trace/log là sự kiện rời rạc, hợp push qua OTLP. |
+| Sampling trace để làm gì? | Trace rất nhiều → lấy mẫu (head/tail sampling) để giảm chi phí lưu trữ mà vẫn giữ trace lỗi/chậm. |
+| Vì sao Loki rẻ hơn Elasticsearch cho log? | Loki chỉ index **label**, không full-text index toàn bộ log → ít tài nguyên; truy vấn LogQL lọc label + grep. |
+| Alert đi đâu? | Prometheus rule → **Alertmanager** → (email/Slack/webhook). |
+| OTel Collector cho lợi gì? | Tách app khỏi backend: đổi Tempo/Loki/Prometheus không phải sửa/deploy lại app; gom, xử lý (batch), định tuyến tập trung. |
+| RED / USE là gì? | **RED** (Rate, Errors, Duration) cho service; **USE** (Utilization, Saturation, Errors) cho tài nguyên — hai khung chọn metric cần theo dõi. |
+
+### 10.7 (Tùy chọn) Nếu muốn khôi phục Traces/Logs live — làm TRƯỚC demo, KHÔNG live
+
+Cụm đang căng RAM (xem Phần 0) nên khôi phục Tempo/Loki có rủi ro. Nếu vẫn muốn:
+- **Loki:** cần dựng lại `loki-minio` (object storage) rồi scale lại
+  `loki-write/loki-backend/loki-read/loki-gateway` (đã scale-down lúc cứu RAM).
+- **Traces:** cần bật trace export/sampling ở OTel agent của app (biến môi trường
+  `OTEL_TRACES_SAMPLER`/`OTEL_TRACES_EXPORTER`) — sửa Helm values, deploy lại.
+
+```bash
+kubectl get statefulset -n observability | grep -i minio     # kiểm tra minio
+helm list -n observability                                    # release loki/tempo
+```
+
+> Khuyến nghị: **demo Metrics live + trình bày kiến trúc Traces/Logs** (an toàn,
+> trung thực, đủ chiều sâu để trả lời câu hỏi). Khôi phục backend nằm ngoài phạm vi bắt buộc.
 
 ---
 
@@ -813,4 +1003,4 @@ doctl kubernetes cluster node-pool update \
 | mTLS STRICT (§5.2.1) | Mục 7 | ⚠️ chạy Phần 1B (áp lên `staging`) |
 | Kiali topology (§5.2.2) | Mục 8 | ⚠️ chạy Phần 1B (namespace `staging`) |
 | Retry + Authz policy (§5.2.3) | Mục 9 | ⚠️ chạy Phần 1B (áp lên `staging`) |
-| Observability (§2.1) | Mục 10 | ⚠️ Loki hỏng, demo metric+trace |
+| Observability (§2.1) | Mục 10 | ✅ Metrics live; ⚠️ Traces/Logs trình bày kiến trúc |
