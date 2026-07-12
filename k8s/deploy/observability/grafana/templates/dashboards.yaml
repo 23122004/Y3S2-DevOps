@@ -1,16 +1,8 @@
-apiVersion: grafana.integreatly.org/v1beta1
-kind: GrafanaDashboard
-metadata:
-  name: jvm-dashboard
-spec:
-  instanceSelector:
-    matchLabels:
-      dashboards: "grafana"
-  url: "https://grafana.com/api/dashboards/4701/revisions/10/download"
-  datasources:
-    - datasourceName: prometheus
-      inputName: DS_PROMETHEUS
----
+# NOTE: community dashboard #4701 (JVM Micrometer) removed — it filters on
+# Micrometer scrape labels (application/area/instance) that do NOT exist here.
+# Our apps emit metrics via the OpenTelemetry Java agent using OTel semantic
+# labels (service_name/jvm_memory_type/k8s_namespace_name), so #4701 rendered
+# "No data". Replaced by templates/jvm-otel-dashboard.yaml (uid jvm-otel).
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDashboard
 metadata:

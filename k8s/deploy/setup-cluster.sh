@@ -65,11 +65,13 @@ helm upgrade --install elasticsearch-cluster ./elasticsearch/elasticsearch-clust
 --set elasticsearch.replicas="$ELASTICSEARCH_REPLICAES" \
 --set kibana.ingress.hostname="kibana.$DOMAIN"
 
-#Install loki
+#Install loki (SingleBinary + filesystem on a PVC — real schemaConfig, no minio/S3).
+# NOTE: do NOT pass --set loki.useTestSchema=true here; the fixed values file has a
+# real schemaConfig. The old SimpleScalable + useTestSchema setup could not persist
+# logs (read-only fs). See docs/loki-fix-runbook.md.
 helm upgrade --install loki grafana/loki \
  --create-namespace --namespace observability \
- -f ./observability/loki.values.yaml \
- --set loki.useTestSchema=true
+ -f ./observability/loki.values.fixed.yaml
 
 #Install tempo
 helm upgrade --install tempo grafana/tempo \

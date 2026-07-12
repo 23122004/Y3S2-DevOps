@@ -9,12 +9,15 @@
 #   Apply demo : kubectl apply -f authorization-policy-strict-demo.yaml
 #   Revert     : kubectl delete -f authorization-policy-strict-demo.yaml
 #
-# Test:
-#   ALLOW : kubectl exec -n yas deploy/order -c istio-proxy -- \
-#             curl -s -o /dev/null -w '%{http_code}\n' http://product.staging.svc.cluster.local/actuator/health
-#           => 200
-#   DENY  : kubectl exec -n yas deploy/tax   -c istio-proxy -- \
-#             curl -s -o /dev/null -w '%{http_code}\n' http://product.staging.svc.cluster.local/actuator/health
+# Test — MUST use the mesh-tester pods (curl via the app container -> traffic goes
+# through the sidecar and carries the pod's SPIFFE identity). Do NOT curl from
+# `-c istio-proxy`: UID 1337 egresses PLAINTEXT with no identity, so every caller
+# (even order) gets 403 and the demo proves nothing.
+#   ALLOW : kubectl exec -n staging mesh-tester-order   -c tester -- \
+#             curl -s -o /dev/null -w '%{http_code}\n' http://product.staging.svc.cluster.local/
+#           => not 403 (404 for '/', i.e. allowed through to the app)
+#   DENY  : kubectl exec -n staging mesh-tester-default -c tester -- \
+#             curl -s -o /dev/null -w '%{http_code}\n' http://product.staging.svc.cluster.local/
 #           => 403
 ---
 apiVersion: security.istio.io/v1

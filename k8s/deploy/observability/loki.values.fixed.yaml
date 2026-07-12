@@ -1,0 +1,95 @@
+# =============================================================================
+# Loki — FIXED values (SingleBinary + filesystem on a persistent volume)
+# =============================================================================
+# WHY the old setup was broken (loki.values.yaml + --set loki.useTestSchema=true):
+#   - deploymentMode defaulted to SimpleScalable (write/read/backend), which
+#     REQUIRES shared object storage (S3/GCS/minio). But minio.enabled=false and
+#     no S3 was configured, and persistence was disabled (emptyDir on a
+#     read-only root fs) => ingester could not flush chunks:
+#       "failed to flush chunks: store put chunk: mkdir fake: read-only file system"
+#       "failed to CAS cluster seed key: ... read-only file system"
+#   - useTestSchema=true is a smoke-test schema, not meant for real ingestion.
+#   - write/read limited to 128Mi RAM => OOM/crashloops.
+#
+# THE FIX: run Loki in SingleBinary mode with the local filesystem backed by a
+# DigitalOcean block-storage PVC. No object storage needed, lightest footprint.
+# Promtail and the OTel collector keep pushing to the SAME `loki-gateway`
+# Service, so nothing downstream changes.
+#
+# APPLY / VERIFY / ROLLBACK: see docs/loki-fix-runbook.md  (NOT applied yet).
+# =============================================================================
+
+deploymentMode: SingleBinary
+
+loki:
+  auth_enabled: false
+  commonConfig:
+    replication_factor: 1
+  storage:
+    type: filesystem
+  # Real schema (replaces useTestSchema). tsdb + filesystem, current-gen v13.
+  schemaConfig:
+    configs:
+      - from: "2024-01-01"
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: index_
+          period: 24h
+  # keep ingested logs ~7 days; plenty for a demo, small on disk
+  limits_config:
+    retention_period: 168h
+
+# ---- SingleBinary target: 1 replica with a persistent volume (writable fs) ----
+singleBinary:
+  replicas: 1
+  nodeSelector:
+    doks.digitalocean.com/node-pool: devops-project02-mem-opt
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: do-block-storage
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+
+# ---- Disable the SimpleScalable components (replaced by singleBinary) ----
+write:
+  replicas: 0
+read:
+  replicas: 0
+backend:
+  replicas: 0
+
+# ---- Gateway stays: promtail + otel-collector push to `loki-gateway` ----
+gateway:
+  enabled: true
+  nodeSelector:
+    doks.digitalocean.com/node-pool: devops-project02-mem-opt
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 64Mi
+
+# ---- Not needed for SingleBinary + filesystem ----
+minio:
+  enabled: false
+test:
+  enabled: false
+lokiCanary:
+  enabled: false
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false
+monitoring:
+  selfMonitoring:
+    enabled: false
+    grafanaAgent:
+      installOperator: false

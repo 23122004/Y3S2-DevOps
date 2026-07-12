@@ -2,109 +2,123 @@ global:
   domain: dev.yas.local.com
 product:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-product
-      tag: aea1ca01bc702fa0c4bee111ee6466cc95c99c1f
+      tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 cart:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-cart
-      tag: aea1ca01bc702fa0c4bee111ee6466cc95c99c1f
+      tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 order:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-order
-      tag: aea1ca01bc702fa0c4bee111ee6466cc95c99c1f
+      tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 customer:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-customer
-      tag: aea1ca01bc702fa0c4bee111ee6466cc95c99c1f
+      tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 inventory:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-inventory
-      tag: aea1ca01bc702fa0c4bee111ee6466cc95c99c1f
+      tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 tax:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-tax
-      tag: aea1ca01bc702fa0c4bee111ee6466cc95c99c1f
+      tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 media:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-media
-      tag: aea1ca01bc702fa0c4bee111ee6466cc95c99c1f
+      tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
     extraObjects:
       - apiVersion: v1
         kind: PersistentVolumeClaim
@@ -131,39 +145,43 @@ media:
         mountPath: /images
 search:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-search
-      tag: aea1ca01bc702fa0c4bee111ee6466cc95c99c1f
+      tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 sampledata:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-sampledata
-      tag: aea1ca01bc702fa0c4bee111ee6466cc95c99c1f
+      tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
     extraEnvs:
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 storefront-ui:
   ui:
     image:
       repository: ghcr.io/23122004/yas-storefront-ui
-      tag: aea1ca01bc702fa0c4bee111ee6466cc95c99c1f
+      tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
     resources:
       requests:
         cpu: 50m
@@ -178,7 +196,7 @@ backoffice-ui:
   ui:
     image:
       repository: ghcr.io/23122004/yas-backoffice-ui
-      tag: aea1ca01bc702fa0c4bee111ee6466cc95c99c1f
+      tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
     resources:
       requests:
         cpu: 50m
@@ -188,13 +206,15 @@ backoffice-ui:
         memory: 256Mi
 storefront-bff:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-storefront-bff
-      tag: aea1ca01bc702fa0c4bee111ee6466cc95c99c1f
+      tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
@@ -206,18 +226,20 @@ storefront-bff:
       - name: SPRING_CLOUD_GATEWAY_ROUTES_0_URI
         value: "http://nginx-dev"
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
     ingress:
       host: storefront.dev.yas.local.com
 backoffice-bff:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-backoffice-bff
-      tag: aea1ca01bc702fa0c4bee111ee6466cc95c99c1f
+      tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       limits:
         cpu: 500m
         memory: 512Mi
@@ -229,13 +251,13 @@ backoffice-bff:
       - name: SPRING_CLOUD_GATEWAY_ROUTES_0_URI
         value: "http://nginx-dev"
       - name: JAVA_OPTS
-        value: "-Xms32m -Xmx160m -XX:MaxRAMPercentage=65.0"
+        value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
     ingress:
       host: backoffice.dev.yas.local.com
 swagger-ui:
   image:
     repository: ghcr.io/23122004/yas-swagger-ui
-    tag: aea1ca01bc702fa0c4bee111ee6466cc95c99c1f
+    tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
   resources:
     requests:
       cpu: 50m
