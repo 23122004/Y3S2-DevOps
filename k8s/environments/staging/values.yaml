@@ -2,6 +2,8 @@ global:
   domain: staging.yas.local.com
 product:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-product
       tag: v1.0.0
@@ -17,6 +19,8 @@ product:
         value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 cart:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-cart
       tag: v1.0.0
@@ -32,6 +36,8 @@ cart:
         value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 order:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-order
       tag: v1.0.0
@@ -47,6 +53,8 @@ order:
         value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 customer:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-customer
       tag: v1.0.0
@@ -62,6 +70,8 @@ customer:
         value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 inventory:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-inventory
       tag: v1.0.0
@@ -77,6 +87,8 @@ inventory:
         value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 tax:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-tax
       tag: v1.0.0
@@ -92,6 +104,8 @@ tax:
         value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 media:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-media
       tag: v1.0.0
@@ -131,6 +145,8 @@ media:
         mountPath: /images
 search:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-search
       tag: v1.0.0
@@ -146,6 +162,8 @@ search:
         value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 sampledata:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-sampledata
       tag: v1.0.0
@@ -188,6 +206,8 @@ backoffice-ui:
         memory: 256Mi
 storefront-bff:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-storefront-bff
       tag: v1.0.0
@@ -211,6 +231,8 @@ storefront-bff:
       host: storefront.staging.yas.local.com
 backoffice-bff:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-backoffice-bff
       tag: v1.0.0

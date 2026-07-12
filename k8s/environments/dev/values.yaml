@@ -2,6 +2,8 @@ global:
   domain: dev.yas.local.com
 product:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-product
       tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
@@ -17,6 +19,8 @@ product:
         value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 cart:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-cart
       tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
@@ -32,6 +36,8 @@ cart:
         value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 order:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-order
       tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
@@ -47,6 +53,8 @@ order:
         value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 customer:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-customer
       tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
@@ -62,6 +70,8 @@ customer:
         value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 inventory:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-inventory
       tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
@@ -77,6 +87,8 @@ inventory:
         value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 tax:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-tax
       tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
@@ -92,6 +104,8 @@ tax:
         value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 media:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-media
       tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
@@ -131,6 +145,8 @@ media:
         mountPath: /images
 search:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-search
       tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
@@ -146,6 +162,8 @@ search:
         value: "-Xms32m -Xmx128m -XX:MaxRAMPercentage=65.0"
 sampledata:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-sampledata
       tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
@@ -188,6 +206,8 @@ backoffice-ui:
         memory: 256Mi
 storefront-bff:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-storefront-bff
       tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
@@ -211,6 +231,8 @@ storefront-bff:
       host: storefront.dev.yas.local.com
 backoffice-bff:
   backend:
+    serviceMonitor:
+      enabled: false
     image:
       repository: ghcr.io/23122004/yas-backoffice-bff
       tag: 6384b29b8117e3d39afb9d8760398da08fd3ea5f
