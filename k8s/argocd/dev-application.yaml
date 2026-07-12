@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: 'https://github.com/23122004/Y3S2-DevOps.git'
-    targetRevision: main
+    targetRevision: dev
     path: k8s/charts/yas-umbrella
     helm:
       valueFiles:
